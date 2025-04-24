@@ -63,42 +63,8 @@ git checkout -b feat/my-change
 
 git add .
 make commit     # Uses Commitizen to prompt for a conventional commit message
-
-# After merging and tagging a release
 make bump       # Bumps version and updates changelog
 git push origin feat/my-change
 # Open a pull request
 ```
 
----
-
-## 🗂 Structure
-
-```
-src/
-├── api/         # FastAPI app
-└── core/        # Typer CLI
-.vscode/         # Dev tooling (tasks, launch)
-.devcontainer/   # Optional remote dev setup
-Makefile         # CLI shortcuts
-pyproject.toml   # Config for all tools
-```
-
----
-
-## 🔮 Coming Soon
-
-- [ ] Production Dockerfile
-- [ ] Terraform infra (Azure Container App, ACR)
-- [ ] CI/CD via GitHub Actions
-- [ ] LLM-powered parsing pipeline
-
----
-
-## 📜 License
-
-MIT © Luk Verhelst / Dataframe One
-
----
-
-> Questions? Ideas? Feedback? Let’s build Waypath together.
