@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🧹 Ruff Check",
+      "type": "shell",
+      "command": "uvx ruff check --output-format=github",
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent"
+      }
+    },
+    {
+      "label": "🧪 MyPy Type Check",
+      "type": "shell",
+      "command": "uvx mypy .",
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "🎨 Format Code (Ruff)",
+      "type": "shell",
+      "command": "uvx ruff format .",
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "label": "🚀 Full CI Check",
+      "type": "shell",
+      "command": "make lint && make typecheck",
+      "group": "build",
+      "dependsOrder": "sequence"
+    }
+  ]
+}

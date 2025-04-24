@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "🧪 CLI: Run waypath",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "core.cli",
+            "justMyCode": true,
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        },
+        {
+            "name": "🚀 API: Run FastAPI (uv)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uv",
+            "args": [
+                "run",
+                "fastapi",
+                "dev"
+            ],
+            "justMyCode": true,
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "cwd": "${workspaceFolder}/src/api"
+        }
+    ]
+}

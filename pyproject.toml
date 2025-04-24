@@ -1,0 +1,45 @@
+[project]
+name = "Waypath"
+version = "0.1.2"
+description = "Waypath is an AI-driven workflow automation platform focused initially on order processing"
+authors = [{ name = "LukV", email = "luk.verhelst@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+
+dependencies = ["fastapi[standard]>=0.115.12", "typer>=0.15.2", "uv>=0.6.12"]
+
+[dependency-groups]
+dev = [
+    "commitizen>=4.4.1",
+    "mypy>=1.15.0",
+    "pre-commit>=4.2.0",
+    "ruff>=0.11.2",
+    "debugpy>=1.8.1",
+]
+
+[project.scripts]
+wpath = "core.cli:app"
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "preserve"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.commitizen] # https://commitizen-tools.github.io/commitizen/config/
+bump_message = "bump: v$current_version → v$new_version"
+tag_format = "v$version"
+update_changelog_on_bump = true
+version_provider = "pep621"
+
+[tool.uv]
+package = true
