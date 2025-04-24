@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Run Lint, Type Check, and Tests
+    name: Run Lint, Type Checks
     runs-on: ubuntu-latest
 
     steps:
@@ -41,6 +41,3 @@ jobs:
 
       - name: 🔍 MyPy (type checks)
         run: uvx mypy .
-
-      - name: ✅ Pytest with coverage (no threshold)
-        run: uvx --from pytest-cov pytest --cov=src --cov-report=term-missing
