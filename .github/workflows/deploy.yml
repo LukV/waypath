@@ -26,14 +26,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: ⚙️ Install uv & Terraform
-        run: |
-          curl -Ls https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          sudo apt-get update && sudo apt-get install -y unzip
-          curl -fsSL https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip -o terraform.zip
-          unzip terraform.zip && sudo mv terraform /usr/local/bin/
         
       - name: ⚙️ Install uv
         run: |
