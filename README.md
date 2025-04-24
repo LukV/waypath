@@ -53,9 +53,7 @@ make format     # Ruff format
 make typecheck  # Mypy strict checks
 ```
 
----
-
-## 🚀 Contributing
+### 🚀 Contributing
 
 ```bash
 git checkout -b feat/my-change

@@ -174,3 +174,11 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc%  
+
+
+# LVE add terraform
+.terraform/
+.terraform-version
+.terraform.lock.hcl
+*.tfstate
+*.backup

@@ -1,0 +1,78 @@
+name: Release & Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write  # Required to push changelog and tags
+
+jobs:
+  release-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      ACR_NAME: waypathacrdev
+      IMAGE_NAME: waypath
+
+    steps:
+      - name: 🧾 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for tagging
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: ⚙️ Install uv & Terraform
+        run: |
+          curl -Ls https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          sudo apt-get update && sudo apt-get install -y unzip
+          curl -fsSL https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip -o terraform.zip
+          unzip terraform.zip && sudo mv terraform /usr/local/bin/
+
+      - name: 📦 Sync dependencies
+        run: uv sync --dev
+
+      - name: ✅ Lint, Typecheck
+        run: |
+          make lint
+          make typecheck
+
+      - name: 🧾 Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 📝 Generate changelog
+        run: uvx --from commitizen cz changelog
+
+      - name: 🔢 Bump version
+        run: uvx --from commitizen cz bump --yes
+
+      - name: 🚀 Push version & changelog
+        run: |
+          git push --follow-tags origin main
+
+      - name: 🔐 Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: 🔁 Azure Container Registry Login
+        run: az acr login --name $ACR_NAME
+
+      - name: 🐳 Build & Push Docker Image
+        run: |
+          docker buildx create --use
+          docker buildx build --platform linux/amd64 -t $ACR_NAME.azurecr.io/$IMAGE_NAME:latest . --push
+
+      - name: 📦 Terraform Apply
+        working-directory: terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve
