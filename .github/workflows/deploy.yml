@@ -34,6 +34,15 @@ jobs:
           sudo apt-get update && sudo apt-get install -y unzip
           curl -fsSL https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip -o terraform.zip
           unzip terraform.zip && sudo mv terraform /usr/local/bin/
+        
+      - name: ⚙️ Install uv & Terraform
+        run: |
+          curl -Ls https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          sudo apt-get update && sudo apt-get install -y unzip
+          curl -fsSL https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip -o terraform.zip
+          unzip -o terraform.zip
+          sudo mv terraform /usr/local/bin/
 
       - name: 📦 Sync dependencies
         run: uv sync --dev
