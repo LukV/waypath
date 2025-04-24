@@ -1,6 +1,6 @@
 [project]
 name = "Waypath"
-version = "0.1.2"
+version = "0.2.0"
 description = "Waypath is an AI-driven workflow automation platform focused initially on order processing"
 authors = [{ name = "LukV", email = "luk.verhelst@gmail.com" }]
 readme = "README.md"
