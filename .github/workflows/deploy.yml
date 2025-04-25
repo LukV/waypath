@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write  # Required to push changelog and tags
+  contents: write  # Needed to push changelog and tags
 
 jobs:
   release-and-deploy:
@@ -15,25 +15,24 @@ jobs:
     env:
       ACR_NAME: waypathacrdev
       IMAGE_NAME: waypath
+      RESOURCE_GROUP: rg-waypath-dev
+      CONTAINER_APP: waypath-api-dev
 
     steps:
       - name: 🧾 Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required for tagging
+          fetch-depth: 0  # Needed for tagging
 
       - name: 🐍 Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-        
+
       - name: ⚙️ Install uv
         run: |
           curl -Ls https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-        
-      - name: ⚙️ Set up Terraform
-        uses: hashicorp/setup-terraform@v3
 
       - name: 📦 Sync dependencies
         run: uv sync --dev
@@ -69,10 +68,15 @@ jobs:
       - name: 🐳 Build & Push Docker Image
         run: |
           docker buildx create --use
-          docker buildx build --platform linux/amd64 -t $ACR_NAME.azurecr.io/$IMAGE_NAME:latest . --push
+          docker buildx build \
+            --platform linux/amd64 \
+            -t $ACR_NAME.azurecr.io/$IMAGE_NAME:${{ github.sha }} \
+            -t $ACR_NAME.azurecr.io/$IMAGE_NAME:latest \
+            . --push
 
-      - name: 📦 Terraform Apply
-        working-directory: terraform
+      - name: 🔄 Restart Container App with SHA image
         run: |
-          terraform init
-          terraform apply -auto-approve
+          az containerapp update \
+            --name $CONTAINER_APP \
+            --resource-group $RESOURCE_GROUP \
+            --image $ACR_NAME.azurecr.io/$IMAGE_NAME:${{ github.sha }}
