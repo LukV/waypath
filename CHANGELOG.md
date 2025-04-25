@@ -1,4 +1,4 @@
-## v0.5.0 (2025-04-24)
+## v0.6.0 (2025-04-25)
 
 ### Feat
 
@@ -7,6 +7,7 @@
 
 ### Fix
 
+- **deploy.yml**: Fix build errors
 - **deploy.yml**: fix build error
 - **deploy.yml**: fix build error
 - **deploy.yml**: fix build error
