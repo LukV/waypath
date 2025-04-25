@@ -12,30 +12,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🧾 Checkout repository
+      # 1. Checkout source
+      - name: "🧾 Checkout repository"
         uses: actions/checkout@v4
 
-      - name: ⚙️ Set up Python 3.12
+      # 2. Install Poetry *before* setup‑python so the built‑in cache can find it
+      - name: "📦 Install Poetry"
+        uses: snok/install-poetry@v1
+        with:
+          version: latest          # pin if you prefer a specific version
+          virtualenvs-create: false # we'll let setup‑python provide the interpreter
+
+      # 3. Set up the desired Python version and enable Poetry cache
+      - name: "⚙️ Set up Python 3.12"
+        id: python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'poetry'
+          python-version: "3.12"
+          cache: poetry
+          cache-dependency-path: poetry.lock  # speeds up cache hits
 
-      - name: 📦 Install Poetry
-        shell: bash
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-          echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
-          export PATH="$HOME/.local/bin:$PATH"
-          hash -r
-          poetry --version
+      # 4. (Optional) force Poetry to use the interpreter we just installed
+      - name: "🐍 Select Python for Poetry"
+        run: poetry env use "${{ steps.python.outputs.python-path }}"
 
-      - name: 📥 Install dependencies (no root install)
+      # 5. Install dependencies & run checks
+      - name: "📥 Install dependencies (no root install)"
         run: poetry install --no-root
 
-      - name: 🧹 Ruff (lint + format)
+      - name: "🧹 Ruff (lint + format)"
         run: poetry run ruff check --output-format=github
 
-      - name: 🔍 MyPy (type checks)
+      - name: "🔍 MyPy (type checks)"
         run: poetry run mypy .
