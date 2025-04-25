@@ -22,11 +22,15 @@
 - [VSCode](https://code.visualstudio.com/)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [Git](https://git-scm.com/)
-- [uv](https://github.com/astral-sh/uv):  
-  Install with:
+- Poetry
+  Install Poetry
   ```bash
-  curl -LsSf https://astral.sh/uv/install.sh | sh
+  curl -sSL https://install.python-poetry.org | python3 -
+  # ensure Poetry is available in your shell:
+  poetry --version
   ```
+
+> 💥 Pro tip: You can use pyenv to install and manage specific Python versions, then let Poetry use it via `poetry env use $(pyenv which python)`.
 
 ### 2. Clone and Set Up
 
@@ -36,7 +40,7 @@ cd waypath
 make install # Installs dependencies and sets up pre-commit hooks
 ```
 
->  💥 Find all make commands in the Makefile under the project root folder.
+> 💥 Find all make commands in the Makefile under the project root folder.
 
 ---
 
@@ -77,7 +81,7 @@ make commit
 Run checks before committing:
 
 ```bash
-uv run --link-mode=copy pre-commit run --all-files
+poetry run pre-commit run --all-files
 ```
 
 ### Git Workflow
@@ -95,7 +99,7 @@ git pull origin main
 git checkout -b feature/my-change
 # Make changes
 git add .
-uv run --link-mode=copy pre-commit run --all-files
+poetry run pre-commit run --all-files
 make commit
 git push origin feature/my-change
 ```

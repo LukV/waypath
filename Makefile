@@ -1,30 +1,26 @@
-# Makefile
-
 .PHONY: install format lint typecheck test serve clean commit bump
 
 install:
-	pip install -r requirements.txt
+	poetry lock
+	poetry install
 
 format:
-	python -m ruff format src
+	poetry run ruff format src
 
 lint:
-	python -m ruff check src
+	poetry run ruff check src
 
 typecheck:
-	python -m mypy src
-
-test:
-	pytest tests
+	poetry run mypy src
 
 serve:
-	uvicorn src.api.app:app --reload --reload-dir src
+	poetry run uvicorn src.api.app:app --reload --reload-dir src
 
 clean:
 	rm -rf .venv .pytest_cache __pycache__ dist build .ruff_cache
 
 commit:
-	uvx --from commitizen cz commit
+	poetry run cz commit
 
 bump:
-	uvx --from commitizen cz bump
+	poetry run cz bump

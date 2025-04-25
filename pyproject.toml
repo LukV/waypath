@@ -1,22 +1,29 @@
-[project]
-name = "Waypath"
+[tool.poetry]
+name = "waypath"
 version = "0.5.0"
 description = "Waypath is an AI-driven workflow automation platform focused initially on order processing"
-authors = [{ name = "LukV", email = "luk.verhelst@gmail.com" }]
+authors = ["LukV <luk.verhelst@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.12"
-license = { file = "LICENSE" }
+license = "LICENSE"
+packages = [{ include = "core", from = "src" }]
 
-[project.scripts]
+[tool.poetry.dependencies]
+python = ">=3.12,<4.0"
+fastapi = "^0.115.12"
+uvicorn = "^0.34.2"
+typer = "^0.15.2"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.11.7"
+mypy = "^1.15.0"
+pre-commit = "^4.2.0"
+commitizen = "^4.6.0"
+
+[tool.poetry.scripts]
 wpath = "core.cli:app"
 
-[tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
-
-[tool.ruff.lint.pydocstyle]
-convention = "numpy"
-
 [tool.ruff]
+# your ruff config here
 line-length = 100
 
 [tool.ruff.format]
@@ -24,11 +31,14 @@ quote-style = "preserve"
 indent-style = "space"
 line-ending = "auto"
 
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
 [tool.commitizen] # https://commitizen-tools.github.io/commitizen/config/
 bump_message = "bump: v$current_version → v$new_version"
 tag_format = "v$version"
 update_changelog_on_bump = true
 version_provider = "pep621"
-
-[tool.uv]
-package = true

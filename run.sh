@@ -21,8 +21,7 @@ fi
 
 docker run \
     --rm \
-    --volume .:/app \
-    --volume /app/.venv \
+    --volume "$(pwd)":/app \
     --publish 8000:8000 \
     $INTERACTIVE \
     $(docker build -q .) \

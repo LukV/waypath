@@ -6,4 +6,4 @@ app = FastAPI()
 @app.get("/")
 async def root() -> dict[str, str]:
     """Print a greeting."""
-    return {"message": "Hello Godot!"}
+    return {"message": "Hello Maria Godot!"}
