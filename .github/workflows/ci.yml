@@ -23,8 +23,11 @@ jobs:
 
       - name: 📦 Install Poetry
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          curl -sSL https://install.python-poetry.org | python3 - && \
+          export PATH="$HOME/.local/bin:$PATH" && \
+          echo "$HOME/.local/bin" >> $GITHUB_PATH && \
+          poetry --version
+          # now poetry is available in the current step and future steps
 
       - name: 📥 Install dependencies (no root install)
         run: poetry install --no-root
