@@ -22,7 +22,7 @@
             "settings": {
                 "editor.formatOnSave": true,
                 "editor.defaultFormatter": "charliermarsh.ruff",
-                "python.formatting.provider": "none", // Disable Black/Microsoft formatter
+                "python.formatting.provider": "none",
                 "[python]": {
                     "editor.formatOnSave": true,
                     "editor.defaultFormatter": "charliermarsh.ruff"
@@ -30,13 +30,10 @@
             }
         }
     },
+    "postCreateCommand": "poetry install --no-root",
+    "postStartCommand": "poetry run pre-commit install",
     "containerEnv": {
-        "DISPLAY": "dummy",
-        "PYTHONUNBUFFERED": "True",
-        "UV_LINK_MODE": "copy",
-        "UV_PROJECT_ENVIRONMENT": "/home/vscode/.venv"
+        "PYTHONUNBUFFERED": "True"
     },
-    "postCreateCommand": "uv sync --frozen",
-    "postStartCommand": "uv run pre-commit install",
     "remoteUser": "vscode"
 }

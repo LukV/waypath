@@ -1,32 +1,40 @@
-# Use a Python image with uv pre-installed
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+# Base image with Python 3.12
+FROM python:3.12-slim
 
-# Install the project into `/app`
+# Set workdir
 WORKDIR /app
 
-# Enable bytecode compilation
-ENV UV_COMPILE_BYTECODE=1
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl build-essential git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy from the cache instead of linking since it's a mounted volume
-ENV UV_LINK_MODE=copy
+# Install Poetry
+ENV POETRY_VERSION=1.8.2
+RUN curl -sSL https://install.python-poetry.org | python3 -
+ENV PATH="/root/.local/bin:$PATH"
 
-# Install the project's dependencies using the lockfile and settings
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project --no-dev
+# Copy only files needed to install dependencies
+COPY pyproject.toml poetry.lock ./
 
-# Then, add the rest of the project source code and install it
-# Installing separately from its dependencies allows optimal layer caching
-ADD . /app
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
+# Install dependencies (without dev)
+RUN poetry install --no-root --no-dev
 
-# Place executables in the environment at the front of the path
+# Now add the full project
+COPY . .
+
+# Install your package (so `wpath` works)
+RUN poetry install --no-dev
+
+# Activate virtualenv path for scripts
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Reset the entrypoint, don't invoke `uv`
-ENTRYPOINT []
+# Expose port (optional)
+EXPOSE 8000
 
-# Run app
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Set entrypoint
+ENTRYPOINT ["poetry", "run"]
+
+# Run FastAPI app
+CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000"]

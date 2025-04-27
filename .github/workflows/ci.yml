@@ -12,32 +12,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🧾 Checkout repository
+      # 1. Checkout source
+      - name: "🧾 Checkout repository"
         uses: actions/checkout@v4
 
-      - name: ⚙️ Set up Python 3.12
+      # 2. Install Poetry *before* setup-python so the built‑in cache can detect it
+      - name: "📦 Install Poetry"
+        uses: snok/install-poetry@v1
+        with:
+          version: latest              # pin a version if you prefer
+          virtualenvs-in-project: true # keep the venv in .venv/ for clarity
+
+      # 3. Set up the desired Python version and enable Poetry cache
+      - name: "⚙️ Set up Python 3.12"
+        id: python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
+          cache: poetry
+          cache-dependency-path: poetry.lock
 
-      - name: 📦 Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          version: latest
+      # 4. Tell Poetry to use the interpreter we just installed (creates .venv/)
+      - name: "🐍 Select Python for Poetry"
+        run: poetry env use "${{ steps.python.outputs.python-path }}"
 
-      - name: 💾 Restore uv cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: uv-${{ runner.os }}-${{ hashFiles('**/pyproject.toml', '**/uv.lock') }}
+      # 5. Install dependencies & run checks
+      - name: "📥 Install dependencies (no root install)"
+        run: poetry install --no-root
 
-      - name: 📥 Sync dependencies
-        run: uv sync --active
+      - name: "🧹 Ruff (lint + format)"
+        run: poetry run ruff check --output-format=github
 
-      - name: 🧹 Ruff (lint + format)
-        run: uvx ruff check --output-format=github
-
-      - name: 🔍 MyPy (type checks)
-        run: uvx mypy .
+      - name: "🔍 MyPy (type checks)"
+        run: poetry run mypy .

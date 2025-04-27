@@ -9,21 +9,38 @@
 - ⚡ FastAPI app with CLI interface (`wpath`)
 - ✅ Code quality via `ruff`, `mypy`, `pre-commit`, `commitizen`
 - 🐳 Optional DevContainer support
-- 🔁 GitHub Actions-ready
+- 🔁 GitHub Actions for integration and deployment
 - 🧪 VSCode tasks + launch configurations
 - 🧰 Makefile for common tasks
 
 ---
 
-## 🛠️ Setup
+## 🛠️ Setup Your Development Environment
+
+### 1. Prerequisites
+- Python 3.12+
+- [VSCode](https://code.visualstudio.com/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Git](https://git-scm.com/)
+- Poetry
+  Install Poetry
+  ```bash
+  curl -sSL https://install.python-poetry.org | python3 -
+  # ensure Poetry is available in your shell:
+  poetry --version
+  ```
+
+> 💥 Pro tip: You can use pyenv to install and manage specific Python versions, then let Poetry use it via `poetry env use $(pyenv which python)`.
+
+### 2. Clone and Set Up
 
 ```bash
-git clone https://github.com/your-org/waypath-backend.git
-cd waypath-backend
-make install
+git clone https://github.com/LukV/waypath.git
+cd waypath
+make install # Installs dependencies and sets up pre-commit hooks
 ```
 
-> Installs dependencies and sets up pre-commit hooks
+> 💥 Find all make commands in the Makefile under the project root folder.
 
 ---
 
@@ -31,38 +48,70 @@ make install
 
 ### Run FastAPI API
 ```bash
-cd src/api
-uv run fastapi dev
+make serve
 ```
 
-Visit: [http://localhost:8000](http://localhost:8000)
+Your app is now running at [http://localhost:8000](http://localhost:8000)
 
 ### Run CLI
 ```bash
-wpath hello --name "Waypath dev"
+wpath --name "Waypath dev"
 ```
 
 ---
 
 ## 🧪 Development
 
-### Code quality
+### Coding Standards & Pre-commit
+
+Use ruff and mypy for code quality.
+
 ```bash
 make lint       # Ruff lint
 make format     # Ruff format
 make typecheck  # Mypy strict checks
 ```
 
-### 🚀 Contributing
+Use  [Conventional Commits](https://www.conventionalcommits.org/) via:
 
 ```bash
-git checkout -b feat/my-change
-# Make your changes
-
-git add .
-make commit     # Uses Commitizen to prompt for a conventional commit message
-make bump       # Bumps version and updates changelog
-git push origin feat/my-change
-# Open a pull request
+make commit
 ```
 
+Run checks before committing:
+
+```bash
+poetry run pre-commit run --all-files
+```
+
+### Git Workflow
+
+#### Branch Strategy
+- `main`: The only long-lived branch.
+- `feature/*`: For new features.
+- `fix/*`: For bugfixes.
+
+#### Typical Flow
+
+```bash
+git checkout main
+git pull origin main
+git checkout -b feature/my-change
+# Make changes
+git add .
+poetry run pre-commit run --all-files
+make commit
+git push origin feature/my-change
+```
+
+Then open a Pull Request into main.
+
+### Versioning & Releases
+
+We use **semantic versioning** powered by `commitizen`.
+
+Semantic Versioning Format
+- MAJOR.MINOR.PATCH → like 1.4.2
+- feat: → bumps minor
+- fix: → bumps patch
+- BREAKING CHANGE: → bumps major

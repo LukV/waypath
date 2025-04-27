@@ -1,25 +1,26 @@
-# Makefile
-
-.PHONY: install lint typecheck test commit format clean
+.PHONY: install format lint typecheck test serve clean commit bump
 
 install:
-	uv sync --active 
-	uv run --active pre-commit install
-
-lint:
-	uvx ruff check --output-format=github
+	poetry lock
+	poetry install
 
 format:
-	uvx ruff format .
+	poetry run ruff format src
+
+lint:
+	poetry run ruff check src
 
 typecheck:
-	uvx mypy .
+	poetry run mypy src
 
-commit:
-	uvx --from commitizen cz commit
-
-bump:
-	uvx --from commitizen cz bump
+serve:
+	poetry run uvicorn src.api.app:app --reload --reload-dir src
 
 clean:
 	rm -rf .venv .pytest_cache __pycache__ dist build .ruff_cache
+
+commit:
+	poetry run cz commit
+
+bump:
+	poetry run cz bump
