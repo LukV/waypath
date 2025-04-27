@@ -1,3 +1,8 @@
+[![Dev Container Ready](https://img.shields.io/badge/devcontainer-ready-blue?logo=visualstudiocode)](https://containers.dev/)
+[![CI](https://github.com/LukV/waypath/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/your-repo/actions/workflows/ci.yml)
+![Last Commit](https://img.shields.io/github/last-commit/LukV/waypath)
+[![Codespaces Ready](https://img.shields.io/badge/Codespaces-Ready-blue?logo=github)](https://github.com/codespaces)
+
 # 🚀 Waypath Backend
 
 **Waypath** is an AI-driven workflow automation platform, starting with intelligent order processing. This is the backend service, built with FastAPI, uv, and a battery-included developer setup.
@@ -55,7 +60,7 @@ Your app is now running at [http://localhost:8000](http://localhost:8000)
 
 ### Run CLI
 ```bash
-wpath --name "Waypath dev"
+poetry run wpath --name "Waypath dev"
 ```
 
 ---
