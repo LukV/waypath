@@ -16,12 +16,12 @@ jobs:
       - name: "🧾 Checkout repository"
         uses: actions/checkout@v4
 
-      # 2. Install Poetry *before* setup‑python so the built‑in cache can find it
+      # 2. Install Poetry *before* setup-python so the built‑in cache can detect it
       - name: "📦 Install Poetry"
         uses: snok/install-poetry@v1
         with:
-          version: latest          # pin if you prefer a specific version
-          virtualenvs-create: false # we'll let setup‑python provide the interpreter
+          version: latest              # pin a version if you prefer
+          virtualenvs-in-project: true # keep the venv in .venv/ for clarity
 
       # 3. Set up the desired Python version and enable Poetry cache
       - name: "⚙️ Set up Python 3.12"
@@ -30,9 +30,9 @@ jobs:
         with:
           python-version: "3.12"
           cache: poetry
-          cache-dependency-path: poetry.lock  # speeds up cache hits
+          cache-dependency-path: poetry.lock
 
-      # 4. (Optional) force Poetry to use the interpreter we just installed
+      # 4. Tell Poetry to use the interpreter we just installed (creates .venv/)
       - name: "🐍 Select Python for Poetry"
         run: poetry env use "${{ steps.python.outputs.python-path }}"
 
