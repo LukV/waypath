@@ -1,11 +1,17 @@
 {
   "editor.formatOnSave": true,
-  "python.defaultInterpreterPath": "/home/vscode/.venv/bin/python",
+  "python.defaultInterpreterPath": "/workspaces/waypath/.venv/bin",
   "python.terminal.activateEnvironment": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll": "always"
+    "source.fixAll": "always",
+    "source.organizeImports": "always"
   },
   "ruff.enable": true,
   "ruff.lint.enable": true,
-  "ruff.fixAll": true
+  "ruff.fixAll": true,
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
 }

@@ -32,7 +32,7 @@ exclude = [
 line-length = 88
 indent-width = 4
 
-# Assume Python 3.13
+# Assume Python 3.12
 target-version = "py312"
 
 [lint]
@@ -57,6 +57,7 @@ ignore = [
     "Q002",
     "Q003",
     "W191",
+    "EM101"
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.

@@ -6,12 +6,7 @@
 - **terraform**: adds deploy to azure
 - initial commit
 
-### Fix
+### Feat
 
-- fix build error
-- fix merge conflict
-- migrate from uv to poetry
-- **deploy.yml**: Fix build errors
-- **deploy.yml**: fix build error
-- **deploy.yml**: fix build error
-- **deploy.yml**: fix build error
+- switch uv to poetry
+

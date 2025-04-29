@@ -1,24 +1,18 @@
 [![Dev Container Ready](https://img.shields.io/badge/devcontainer-ready-blue?logo=visualstudiocode)](https://containers.dev/)
-[![CI](https://github.com/LukV/waypath/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/your-repo/actions/workflows/ci.yml)
+[![CI](https://github.com/LukV/waypath/actions/workflows/ci.yml/badge.svg)](https://github.com/LukV/waypath/actions/workflows/ci.yml)
 ![Last Commit](https://img.shields.io/github/last-commit/LukV/waypath)
 [![Codespaces Ready](https://img.shields.io/badge/Codespaces-Ready-blue?logo=github)](https://github.com/codespaces)
 
 # 🚀 Waypath Backend
 
-**Waypath** is an AI-driven workflow automation platform, starting with intelligent order processing. This is the backend service, built with FastAPI, uv, and a battery-included developer setup.
-
----
+**Waypath** is a skeleton Python backend service, built with FastAPI, poetry, and a battery-included developer setup.
 
 ## 📦 Features
 
 - ⚡ FastAPI app with CLI interface (`wpath`)
-- ✅ Code quality via `ruff`, `mypy`, `pre-commit`, `commitizen`
-- 🐳 Optional DevContainer support
-- 🔁 GitHub Actions for integration and deployment
-- 🧪 VSCode tasks + launch configurations
-- 🧰 Makefile for common tasks
-
----
+- ✅ CI/CD via `ruff`, `mypy`, `pre-commit`, `commitizen`
+- 🐳 DevContainer support
+- 🔁 GitHub Actions for integration and deployment to Azure
 
 ## 🛠️ Setup Your Development Environment
 
@@ -45,10 +39,6 @@ cd waypath
 make install # Installs dependencies and sets up pre-commit hooks
 ```
 
-> 💥 Find all make commands in the Makefile under the project root folder.
-
----
-
 ## ▶️ Run the App
 
 ### Run FastAPI API
@@ -62,8 +52,6 @@ Your app is now running at [http://localhost:8000](http://localhost:8000)
 ```bash
 poetry run wpath --name "Waypath dev"
 ```
-
----
 
 ## 🧪 Development
 
@@ -109,9 +97,9 @@ make commit
 git push origin feature/my-change
 ```
 
-Then open a Pull Request into main.
+This triggers the CI Github Action. Then open a Pull Request into main.
 
-### Versioning & Releases
+### From PR to Azure Deployment
 
 We use **semantic versioning** powered by `commitizen`.
 
@@ -120,3 +108,50 @@ Semantic Versioning Format
 - feat: → bumps minor
 - fix: → bumps patch
 - BREAKING CHANGE: → bumps major
+
+### Before Deployment
+
+Before GitHub Actions can deploy the app, **the Azure infrastructure must exist**.  
+Follow the guide here to spin it up using Terraform:  
+[Terraform README](https://github.com/LukV/waypath/blob/main/terraform/README.md)
+
+### Deployment Flow After Merge
+
+1. PR is reviewed and squash-merged into `main`.
+2. GitHub Actions automatically triggers the `Release & Deploy` workflow:
+   - 📂 Checkout the repo
+   - 📦 Install Poetry & Python 3.12
+   - ✅ Run lint and type checks
+   - 📘 Generate changelog
+   - 🔢 Auto-bump the version
+   - 🚀 Push updated version and changelog to GitHub
+   - 🔐 Login to Azure securely
+   - 🐳 Build and push Docker image to Azure Container Registry
+   - 🔄 Restart Azure Container App using the new image
+
+### Key Details
+
+- **Trigger:** on every push to `main` or manually (`workflow_dispatch`)
+- **Version bump:** handled automatically inside the GitHub Action
+- **Docker image tags:** both latest and commit SHA
+- **Deployment:** happens via Azure CLI commands in the workflow
+
+Result:  
+💚 **Your changes are deployed live on Azure** — no manual action needed.
+
+
+## Common Tasks
+
+| Task                        | Command                                      |
+|-----------------------------|----------------------------------------------|
+| Start API locally           | `make serve`                                 |
+| Run pre-commit checks       | `poetry run pre-commit run --all-files`      |
+| Add dependencies            | `poetry add some-lib; poetry update`         |
+| Lock dependencies           | `poetry lock`                                |
+| Lint and type check         | `make lint`                                  |
+| Commit with structure       | `cz commit`                                  |
+| Run tests                   | `make test`                                  |
+
+
+You're ready to contribute. Ask questions, push often, and keep learning! 🚀
+

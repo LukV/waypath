@@ -1,0 +1,9 @@
+# .dockerignore
+.venv
+__pycache__/
+*.pyc
+*.pyo
+.mypy_cache
+.ruff_cache
+application.log
+waypath.db
