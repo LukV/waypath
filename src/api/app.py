@@ -25,7 +25,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
 
 
 # Create FastAPI app instance
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    title="🚀 Waypath API",
+    version="0.1.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
 
 # Load configs
 configure_logging()
