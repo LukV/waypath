@@ -1,24 +1,12 @@
-# Base image
-FROM python:3.12-slim
+# syntax=docker/dockerfile:1
+FROM mcr.microsoft.com/vscode/devcontainers/python:3.12
 
-# Install system deps
-RUN apt-get update && apt-get install -y \
-    curl git build-essential sudo \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Create and activate a virtual environment.
+RUN python -m venv .venv
+ENV PATH=.venv/bin:$PATH
+ENV VIRTUAL_ENV=.venv
 
-# Create non-root user
-RUN useradd -ms /bin/bash vscode && \
-    usermod -aG sudo vscode && \
-    echo 'vscode ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-# Switch to vscode user
-USER vscode
-
-# Install Poetry as vscode user
-RUN curl -sSL https://install.python-poetry.org | python3 -
-
-# Set path to include poetry for non-login shell
-ENV PATH="/home/vscode/.local/bin:$PATH"
-
-# Set working directory
+# Install python dependencies for testing.
 WORKDIR /workspace
+COPY pyproject.toml .
+RUN pip install --no-cache-dir poetry==1.8.4 && poetry install --no-root

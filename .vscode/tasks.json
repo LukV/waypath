@@ -4,7 +4,7 @@
     {
       "label": "🧹 Ruff Check",
       "type": "shell",
-      "command": "uvx ruff check --output-format=github",
+      "command": "make lint",
       "group": "build",
       "problemMatcher": [],
       "presentation": {
@@ -14,7 +14,7 @@
     {
       "label": "🧪 MyPy Type Check",
       "type": "shell",
-      "command": "uvx mypy .",
+      "command": "make typecheck",
       "group": "test",
       "problemMatcher": [],
       "presentation": {
@@ -24,7 +24,7 @@
     {
       "label": "🎨 Format Code (Ruff)",
       "type": "shell",
-      "command": "uvx ruff format .",
+      "command": "make format",
       "group": "build",
       "problemMatcher": [],
       "presentation": {

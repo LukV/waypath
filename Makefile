@@ -1,7 +1,7 @@
 .PHONY: install format lint typecheck test serve clean commit bump
 
 install:
-	poetry lock
+	poetry update
 	poetry install
 
 format:

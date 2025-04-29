@@ -12,6 +12,12 @@ python = ">=3.12,<4.0"
 fastapi = "^0.115.12"
 uvicorn = "^0.34.2"
 typer = "^0.15.2"
+dotenv = "^0.9.9"
+sqlalchemy = {extras = ["mypy"], version = "^2.0.40"}
+python-jose = "^3.4.0"
+ulid-py = "^1.1.0"
+passlib = "^1.7.4"
+pydantic = {extras = ["email"], version = "^2.11.3"}
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.11.7"
@@ -21,6 +27,9 @@ commitizen = "^4.6.0"
 
 [tool.poetry.scripts]
 wpath = "core.cli:app"
+
+[tool.mypy]
+plugins = ["sqlalchemy.ext.mypy.plugin", "pydantic.mypy"]
 
 [tool.ruff]
 # your ruff config here

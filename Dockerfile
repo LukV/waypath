@@ -24,7 +24,7 @@ RUN poetry install --no-root --no-dev
 # Now add the full project
 COPY . .
 
-# Install your package (so `wpath` works)
+# Install your packages
 RUN poetry install --no-dev
 
 # Activate virtualenv path for scripts

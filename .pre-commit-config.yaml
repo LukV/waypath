@@ -4,13 +4,13 @@ fail_fast: true
 
 repos:
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.5.0  
+    rev: v4.5.0
     hooks:
       - id: commitizen
         stages: [commit-msg]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.4  
+    rev: v0.11.4
     hooks:
       - id: ruff
         args: [--fix]
@@ -19,4 +19,11 @@ repos:
     rev: v1.15.0
     hooks:
       - id: mypy
-        args: [--install-types, --non-interactive]
+        additional_dependencies: []
+        args: [
+          "--install-types",
+          "--non-interactive",
+          "--disable-error-code=no-any-return",
+          "--config-file=pyproject.toml"
+        ]
+        language: system

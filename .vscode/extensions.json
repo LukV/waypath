@@ -1,7 +1,15 @@
 {
     "recommendations": [
         "charliermarsh.ruff",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "exiasr.hadolint",
+        "tamasfe.even-better-toml",
+        "ms-azuretools.vscode-docker",
+        "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-python.mypy-type-checker"
+        "ms-python.mypy-type-checker",
+        "github.vscode-github-actions",
+        "pkief.material-icon-theme"
     ]
 }
