@@ -1,3 +1,6 @@
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
@@ -10,16 +13,22 @@ from .routers import auth, users
 # Load environment variables
 load_dotenv()
 
-# Configure logging
-configure_logging()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
+    """Lifespan event handler."""
+    # Startup: create tables (only for local dev)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # Shutdown: (if needed later) : await cleanup()
+
 
 # Create FastAPI app instance
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
-
-# Initialize configurations
+# Load configs
+configure_logging()
 setup_cors(app)
 
 # Include routers

@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.crud import users as crud_users
 from api.models import users as model_users
@@ -26,9 +26,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
-def get_current_user(
+async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db),  # noqa: B008
+    db: AsyncSession = Depends(get_db),  # noqa: B008
 ) -> model_users.User:
     """Retrieve the current user from the provided JWT token."""
     credentials_exception = HTTPException(
@@ -44,23 +44,23 @@ def get_current_user(
     except JWTError as exc:
         raise credentials_exception from exc
 
-    user = crud_users.get_user_by_email(db, email=email)
+    user = await crud_users.get_user_by_email(db, email=email)
     if user is None:
         raise credentials_exception
     return user
 
 
-def hash_password(password: str) -> str:
+async def hash_password(password: str) -> str:
     """Hash a password using bcrypt."""
     return str(pwd_context.hash(password))
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
+async def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plaintext password against a hashed password."""
     return bool(pwd_context.verify(plain_password, hashed_password))
 
 
-def create_access_token(data: dict[str, Any]) -> str:
+async def create_access_token(data: dict[str, Any]) -> str:
     """Create an access JWT token."""
     to_encode = data.copy()
     expire = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
