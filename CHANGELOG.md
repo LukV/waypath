@@ -1,4 +1,4 @@
-## v0.9.0 (2025-04-29)
+## v0.10.0 (2025-04-29)
 
 ### Feat
 
@@ -17,3 +17,7 @@
 - **deploy.yml**: fix build error
 - **deploy.yml**: fix build error
 - **deploy.yml**: fix build error
+
+### Perf
+
+- **database.py**: asynchronous database communication
