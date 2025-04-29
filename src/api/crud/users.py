@@ -5,17 +5,12 @@ from api.schemas import user as user_schemas
 from core.utils import auth, idsvc
 
 
-def create_user(db: Session, user: user_schemas.UserCreate, role: str = "user") -> User:
+def create_user(db: Session, user: user_schemas.UserCreate) -> User:
     """Create a new user in the database."""
     hashed_password = auth.hash_password(user.password) if user.password else None
     user_id = idsvc.generate_id("U")
     db_user = User(
-        id=user_id,
-        username=user.username,
-        email=user.email,
-        password=hashed_password,
-        icon=user.icon,
-        role=role,
+        id=user_id, username=user.username, email=user.email, password=hashed_password
     )
     db.add(db_user)
     db.commit()

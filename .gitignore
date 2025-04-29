@@ -173,7 +173,7 @@ cython_debug/
 .ruff_cache/
 
 # PyPI configuration file
-.pypirc%  
+.pypirc%
 
 
 # LVE add terraform
@@ -185,3 +185,4 @@ cython_debug/
 
 # LVE add egg-info
 *.egg-info/
+*.db

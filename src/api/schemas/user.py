@@ -37,25 +37,19 @@ class UserCreate(BaseModel, PasswordValidationMixin):  # noqa: D101
             "authentication."
         ),
     )
-    icon: str | None = Field(
-        None, description="Optional URL of the user's profile icon or avatar."
-    )
 
     @model_validator(mode="before")
-    def validate_fields(self, values: dict[str, Any]) -> dict[str, Any]:  # noqa: D102
-        password = values.get("password")
+    def validate_fields(cls, data: dict[str, Any]) -> dict[str, Any]:  # noqa: D102, N805
+        password = data.get("password")
         if password:
-            values["password"] = self.validate_password(password)
-        return values
+            data["password"] = cls.validate_password(password)
+        return data
 
 
 class UserResponse(BaseModel):  # noqa: D101
     id: str = Field(..., description="A unique public identifier for the user.")
     username: str = Field(..., description="The username of the user.")
     email: EmailStr = Field(..., description="The email address of the user.")
-    icon: str | None = Field(
-        None, description="The URL of the user's profile icon or avatar, if available."
-    )
     date_created: datetime = Field(
         ..., description="The timestamp when the user was created."
     )

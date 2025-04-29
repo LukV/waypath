@@ -1,40 +1,39 @@
-# Base image with Python 3.12
 FROM python:3.12-slim
 
-# Set workdir
 WORKDIR /app
 
-# Install system dependencies
+# System deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl build-essential git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
+# Install Poetry (globally, not in virtualenv)
 ENV POETRY_VERSION=1.8.2
-RUN curl -sSL https://install.python-poetry.org | python3 -
-ENV PATH="/root/.local/bin:$PATH"
+RUN curl -sSL https://install.python-poetry.org | python3 - \
+    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry
 
-# Copy only files needed to install dependencies
+# Make sure poetry is available
+RUN poetry --version
+
+# Avoid copying local .venv
 COPY pyproject.toml poetry.lock ./
 
-# Install dependencies (without dev)
-RUN poetry install --no-root --no-dev
+# Disable virtualenvs being created outside the container
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+ENV POETRY_NO_INTERACTION=1
 
-# Now add the full project
+# Install main dependencies and this package
+RUN poetry install --only main
+
+# Now copy the actual source code
 COPY . .
 
-# Install your packages
-RUN poetry install --no-dev
-
-# Activate virtualenv path for scripts
-ENV PATH="/app/.venv/bin:$PATH"
-
-# Expose port (optional)
+# Expose port
 EXPOSE 8000
 
-# Set entrypoint
-ENTRYPOINT ["poetry", "run"]
+# Set Python path for module resolution
+ENV PYTHONPATH=/app/src
 
-# Run FastAPI app
+ENTRYPOINT ["poetry", "run"]
 CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000"]

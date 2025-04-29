@@ -14,14 +14,15 @@
             }
         },
         {
-            "name": "🚀 API: Run FastAPI (uv)",
+            "name": "🚀 API: Run FastAPI",
             "type": "debugpy",
             "request": "launch",
-            "module": "uv",
+            "module": "poetry",
             "args": [
                 "run",
-                "fastapi",
-                "dev"
+                "uvicorn",
+                "api.app:app",
+                "--reload"
             ],
             "justMyCode": true,
             "console": "integratedTerminal",
