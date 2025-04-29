@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from jose import JWTError, jwt
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.crud import users as crud_users
 from api.schemas.auth import LoginRequest, TokenPair
@@ -13,21 +13,23 @@ router = APIRouter()
 
 
 @router.post("/login", response_model=TokenPair)
-def login(
-    login_data: LoginRequest, db: Annotated[Session, Depends(get_db)]
+async def login(
+    login_data: LoginRequest, db: Annotated[AsyncSession, Depends(get_db)]
 ) -> dict[str, str]:
     """Endpoint for user login with credentials."""
     if not login_data.username or not login_data.password:
         raise HTTPException(status_code=400, detail="Invalid credentials.")
 
-    user = crud_users.get_user_by_email(
+    user = await crud_users.get_user_by_email(
         db, login_data.username
-    ) or crud_users.get_user_by_username(db, login_data.username)
+    ) or await crud_users.get_user_by_username(db, login_data.username)
 
-    if not user or not auth.verify_password(login_data.password, str(user.password)):
+    if not user or not await auth.verify_password(
+        login_data.password, str(user.password)
+    ):
         raise HTTPException(status_code=400, detail="Invalid credentials.")
 
-    access_token = auth.create_access_token(data={"sub": user.email})
+    access_token = await auth.create_access_token(data={"sub": user.email})
     refresh_token = auth.create_refresh_token(data={"sub": user.email})
     return {
         "access_token": access_token,
@@ -37,8 +39,8 @@ def login(
 
 
 @router.post("/refresh", response_model=TokenPair)
-def refresh_token(
-    token: str, db: Annotated[Session, Depends(get_db)]
+async def refresh_token(
+    token: str, db: Annotated[AsyncSession, Depends(get_db)]
 ) -> dict[str, str]:
     """Refresh the access token using a valid refresh token."""
     try:
@@ -63,7 +65,7 @@ def refresh_token(
             )
 
         # Generate new access and refresh tokens
-        access_token = auth.create_access_token(data={"sub": email})
+        access_token = await auth.create_access_token(data={"sub": email})
         new_refresh_token = auth.create_refresh_token(data={"sub": email})
         return {  # noqa: TRY300
             "access_token": access_token,

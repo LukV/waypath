@@ -1,9 +1,9 @@
 import os
-from collections.abc import Generator
+from collections.abc import AsyncGenerator
 
 import dotenv
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 
 # Base class for SQLAlchemy models
@@ -11,21 +11,27 @@ class Base(DeclarativeBase):  # noqa: D101
     pass
 
 
-# Database connection URL
+# Load environment
 dotenv.load_dotenv()
-SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL", "sqlite:///./waypath.db")
 
-# Initialize the engine
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# Database connection URL
+SQLALCHEMY_DATABASE_URL = os.getenv(
+    "SQLALCHEMY_DATABASE_URL", "sqlite+aiosqlite:///./waypath.db"
+)
 
-# Configure SessionLocal and Base
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Initialize the async engine
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)
+
+# Configure AsyncSession
+async_session_maker = sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)  # type: ignore  # noqa: PGH003
 
 
-def get_db() -> Generator[Session, None, None]:
-    """Yield a new database session for request lifecycle management."""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Dependency to get DB session
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Yield a new async database session for request lifecycle management."""
+    async with async_session_maker() as session:
+        yield session
