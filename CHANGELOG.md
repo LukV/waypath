@@ -1,12 +1,19 @@
-## v0.7.0 (2025-04-27)
+## v0.8.0 (2025-04-29)
 
 ### Feat
 
+- remove icon and role from User entity
+- add create user endpoint
 - switch uv to pip
 - **terraform**: adds deploy to azure
 - initial commit
 
-### Feat
+### Fix
 
-- switch uv to poetry
-
+- fix build error
+- fix merge conflict
+- migrate from uv to poetry
+- **deploy.yml**: Fix build errors
+- **deploy.yml**: fix build error
+- **deploy.yml**: fix build error
+- **deploy.yml**: fix build error
