@@ -21,6 +21,7 @@ pydantic = {extras = ["email"], version = "^2.11.3"}
 aiosqlite = "^0.21.0"
 asyncpg = "^0.30.0"
 llama-cloud-services = "^0.6.20"
+pydantic-ai = "^0.1.8"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.11.7"

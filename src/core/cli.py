@@ -4,10 +4,15 @@ from pathlib import Path
 
 import typer
 from llama_cloud_services import LlamaParse  # type: ignore[import-untyped]
+from pydantic_ai import Agent
+from rich import print  # noqa: A004
+from rich.pretty import Pretty
 
-LLAMA_CLOUD_API_KEY = os.getenv(
-    "LLAMA_CLOUD_API_KEY", "llx-C0Pc1DDOlukdeKpdT6rLrJRHMGmpsgdoyMv5n5JDNu0IeDDa"
-)
+from api.schemas.order import Order
+
+LLAMA_CLOUD_API_KEY = os.getenv("LLAMA_CLOUD_API_KEY")
+OPEN_AI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 
 app = typer.Typer()
 
@@ -19,27 +24,33 @@ def parse(
     *,
     output_path: Path | None = None,
     show: bool = False,
-) -> dict[str, object]:
+) -> None:
     """Parse a document and save the structured data as JSON and optionally as .md."""
-    typer.echo(f"Uploading PDF: {path}")
+    typer.echo(f"🏄 Uploading PDF: {path}")
+    asyncio.run(_parse_internal(path, language, output_path, show))
 
-    markdown = asyncio.run(pdf_to_markdown(str(path), language))
+
+async def _parse_internal(
+    path: Path,
+    language: str,
+    output_path: Path | None,
+    show: bool,  # noqa: FBT001
+) -> None:
+    markdown = await markdown_with_llama_parse(str(path), language)
 
     if output_path:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(markdown, encoding="utf-8")
         typer.echo(f"Saved Markdown to: {output_path}")
 
-    structured_data = asyncio.run(markdown_to_structured_json(markdown))
+    structured_data = await markdown_to_structured_json(markdown)
 
     if show:
-        typer.echo("Parsed Structured Data:")
-        typer.echo(structured_data)
-
-    return structured_data
+        typer.echo("🔥 Parsed Structured Data:")
+        print(Pretty(structured_data.model_dump()))
 
 
-async def pdf_to_markdown(pdf_path: str, lang: str) -> str:
+async def markdown_with_llama_parse(pdf_path: str, lang: str) -> str:
     """Convert PDF to Markdown and return raw concatenated markdown text."""
     parser = LlamaParse(
         api_key=LLAMA_CLOUD_API_KEY,
@@ -56,16 +67,16 @@ async def pdf_to_markdown(pdf_path: str, lang: str) -> str:
     return "\n\n".join(doc.text for doc in markdown_documents)
 
 
-async def markdown_to_structured_json(markdown: str) -> dict[str, object]:
-    """Convert Markdown to structured JSON (dummy for now)."""
-    return {
-        "title": "Simulated Document",
-        "markdown": markdown,
-        "sections": [
-            {"heading": "Introduction", "content": "This is a simulated introduction."},
-            {"heading": "Body", "content": "This is the simulated body content."},
-        ],
-    }
+async def markdown_to_structured_json(markdown: str) -> Order:
+    """Convert Markdown to structured JSON."""
+    agent = Agent(
+        "openai:gpt-4o",
+        system_prompt="Parse the following order confirmation into structured fields.",
+        output_type=Order,
+    )
+
+    result = await agent.run(markdown)
+    return result.output
 
 
 if __name__ == "__main__":
