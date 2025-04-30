@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.crud import users as crud_users
-from api.models import users as model_users
+from core.models import users as model_users
 from core.utils.database import get_db
 
 SECRET_KEY = os.getenv("SECRET_KEY")

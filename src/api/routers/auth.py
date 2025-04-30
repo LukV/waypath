@@ -5,7 +5,7 @@ from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.crud import users as crud_users
-from api.schemas.auth import LoginRequest, TokenPair
+from core.schemas.auth import LoginRequest, TokenPair
 from core.utils import auth
 from core.utils.database import get_db
 
