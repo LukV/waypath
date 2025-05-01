@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -19,3 +21,13 @@ class Order(BaseModel):  # noqa: D101
     vat: float = Field(..., description="VAT amount in EUR")
     total_incl_vat: float = Field(..., description="Total amount including VAT in EUR")
     lines: list[OrderLine] = Field(..., description="Line items in the order")
+
+
+class OrderCreate(Order):  # noqa: D101
+    model_config = {"from_attributes": True}
+
+
+class OrderResponse(Order):  # noqa: D101
+    id: str
+    created_at: datetime
+    created_by: str  # user ID
