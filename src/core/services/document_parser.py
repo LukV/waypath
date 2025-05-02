@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from llama_cloud_services import LlamaParse  # type: ignore[import-untyped]
+from llama_cloud_services import LlamaParse
 
 LLAMA_CLOUD_API_KEY = os.getenv("LLAMA_CLOUD_API_KEY")
 

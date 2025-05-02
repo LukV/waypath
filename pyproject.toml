@@ -56,3 +56,7 @@ bump_message = "bump: v$current_version → v$new_version"
 tag_format = "v$version"
 update_changelog_on_bump = true
 version_provider = "poetry"
+
+[[tool.mypy.overrides]]
+module = "llama_cloud_services.*"
+ignore_missing_imports = true
