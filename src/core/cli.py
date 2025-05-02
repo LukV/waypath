@@ -13,6 +13,12 @@ app = typer.Typer()
 
 
 @app.command()
+def hello(name: str) -> None:
+    """Say hello to NAME."""
+    typer.echo(f"Hello {name}!")
+
+
+@app.command()
 def parse(
     path: Path,
     language: str = "en",
