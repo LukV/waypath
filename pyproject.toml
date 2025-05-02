@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "waypath"
-version = "0.14.0"
+version = "0.15.0"
 description = "Waypath is an AI-driven workflow automation platform focused initially on order processing"
 authors = ["LukV <luk.verhelst@gmail.com>"]
 readme = "README.md"

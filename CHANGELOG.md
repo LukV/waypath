@@ -1,7 +1,11 @@
-## v0.14.0 (2025-04-29)
+## v0.15.0 (2025-05-02)
 
 ### Feat
 
+- add hello cli endpoint
+- store orders in a database
+- **cli.py**: convert markdown to a pydantic model
+- **cli.py**: parse documents with LlamaParse
 - remove icon and role from User entity
 - add create user endpoint
 - switch uv to pip
@@ -10,6 +14,7 @@
 
 ### Fix
 
+- build fix error
 - fix build error
 - fix merge conflict
 - migrate from uv to poetry
@@ -17,6 +22,10 @@
 - **deploy.yml**: fix build error
 - **deploy.yml**: fix build error
 - **deploy.yml**: fix build error
+
+### Refactor
+
+- refactor order processing logic to service orchestrator pattern
 
 ### Perf
 
