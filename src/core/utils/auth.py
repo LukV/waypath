@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.crud import users as crud_users
-from api.models import users as model_users
+from core.db import models
 from core.utils.database import get_db
 
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -29,7 +29,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),  # noqa: B008
-) -> model_users.User:
+) -> models.User:
     """Retrieve the current user from the provided JWT token."""
     credentials_exception = HTTPException(
         status_code=401,

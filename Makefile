@@ -1,4 +1,4 @@
-.PHONY: install format lint typecheck test serve clean commit bump
+.PHONY: install format lint typecheck test serve clean commit bump pre-commit
 
 install:
 	poetry update
@@ -12,6 +12,9 @@ lint:
 
 typecheck:
 	poetry run mypy src
+
+pre-commit:
+	poetry run pre-commit run --all-files
 
 serve:
 	poetry run uvicorn src.api.app:app --reload --reload-dir src
