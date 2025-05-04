@@ -1,0 +1,33 @@
+# syntax=docker/dockerfile:1
+
+FROM mcr.microsoft.com/vscode/devcontainers/python:3.12
+
+# Install base system dependencies (as root)
+USER root
+
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl build-essential git sudo python3-pip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Poetry globally using pip instead of the shell script (less fragile)
+RUN pip install --no-cache-dir poetry==1.8.2
+
+# Make sure poetry is available to all users (symlink not needed)
+ENV PATH="/usr/local/bin:$PATH"
+
+# Set environment for Poetry
+ENV POETRY_NO_INTERACTION=1
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+
+# Set working directory
+WORKDIR /workspaces/waypath
+
+# Switch to vscode user (as declared by base image)
+USER vscode
+
+# Ensure poetry works
+RUN poetry --version
+
+# Set environment variables expected in dev
+ENV PYTHONPATH=/workspaces/waypath/src

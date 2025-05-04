@@ -1,13 +1,15 @@
 {
-    "name": "Waypath",
+    "name": "Waypath Dev",
     "build": {
         "context": "..",
-        "dockerfile": "Dockerfile"
+        "dockerfile": "./Dockerfile.dev"
     },
     "features": {
         "ghcr.io/dhoeric/features/hadolint:1": {}
     },
     "remoteUser": "vscode",
+    "updateRemoteUserUID": true,
+    "postCreateCommand": "poetry install --with dev",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -24,11 +26,13 @@
                 "pkief.material-icon-theme"
             ],
             "settings": {
+                "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+                "python.terminal.activateEnvironment": true,
+                "editor.formatOnSave": true,
                 "editor.codeActionsOnSave": {
                     "source.fixAll": "always",
                     "source.organizeImports": "always"
                 },
-                "editor.formatOnSave": true,
                 "editor.rulers": [
                     120
                 ],
@@ -39,9 +43,7 @@
                 },
                 "[toml]": {
                     "editor.formatOnSave": false
-                },
-                "python.defaultInterpreterPath": ".venv/bin/python",
-                "workbench.editor.wrapTabs": true
+                }
             }
         }
     },

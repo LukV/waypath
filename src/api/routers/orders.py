@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Annotated
@@ -9,10 +10,20 @@ from api.crud import orders as crud_orders
 from core.db import models
 from core.logic.pipeline import DocumentPipeline
 from core.schemas import order as order_schemas
-from core.services.document_parser import DocumentParser
-from core.services.structuring import OrderExtractor
+from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
 from core.utils.auth import get_current_user
 from core.utils.database import get_db
+
+
+class ParserOption(str, Enum):  # noqa: D101
+    llamaparse = "llamaparse"
+    azure = "azure"
+
+
+class ModelOption(str, Enum):  # noqa: D101
+    openai = "openai"
+    azure = "azure"
+
 
 router = APIRouter()
 
@@ -33,7 +44,11 @@ async def create_order(
 
 
 @router.post("/generate", response_model=order_schemas.Order)
-async def generate(file: Annotated[UploadFile, File(...)]) -> order_schemas.Order:
+async def generate(
+    file: Annotated[UploadFile, File(...)],
+    parser: ParserOption = ParserOption.llamaparse,
+    model: ModelOption = ModelOption.openai,
+) -> order_schemas.Order:
     """Receive a document and return structured Order data."""
     suffix = Path(file.filename or "").suffix.lower()
 
@@ -44,21 +59,23 @@ async def generate(file: Annotated[UploadFile, File(...)]) -> order_schemas.Orde
                 Must be one of {', '.join(SUPPORTED_EXTENSIONS)}",
         )
 
+    if parser not in PARSER_REGISTRY:
+        raise HTTPException(status_code=400, detail=f"Unknown parser: {parser}")
+    if model not in EXTRACTOR_REGISTRY:
+        raise HTTPException(status_code=400, detail=f"Unknown model: {model}")
+
     try:
-        # Save to temporary file
-        with NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        with NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             contents = await file.read()
             tmp.write(contents)
             tmp_path = Path(tmp.name)
 
-        # Run pipeline
         pipeline = DocumentPipeline(
-            parser=DocumentParser(path=tmp_path),
-            extractor=OrderExtractor(),
+            parser=PARSER_REGISTRY[parser](tmp_path, "en"),
+            extractor=EXTRACTOR_REGISTRY[model](),
         )
         return await pipeline.run()
 
     finally:
-        # Optional: clean up temp file if you want
         if tmp_path.exists():
             tmp_path.unlink()
