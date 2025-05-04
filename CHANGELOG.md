@@ -1,7 +1,8 @@
-## v0.18.0 (2025-05-04)
+## v0.19.0 (2025-05-04)
 
 ### Feat
 
+- support azure DI and azure OpenAI as parser and extractors
 - add hello cli endpoint
 - store orders in a database
 - **cli.py**: convert markdown to a pydantic model
