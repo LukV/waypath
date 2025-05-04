@@ -1,4 +1,4 @@
-## v0.15.0 (2025-05-02)
+## v0.16.0 (2025-05-04)
 
 ### Feat
 
@@ -25,6 +25,7 @@
 
 ### Refactor
 
+- **factories.py**: create parser and extractor factories to support any doc parser and model
 - refactor order processing logic to service orchestrator pattern
 
 ### Perf
