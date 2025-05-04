@@ -1,8 +1,8 @@
 {
     "name": "Waypath Dev",
     "build": {
-        "context": "..",
-        "dockerfile": "./Dockerfile.dev"
+        "context": ".",
+        "dockerfile": ".devcontainer/Dockerfile.dev"
     },
     "features": {
         "ghcr.io/dhoeric/features/hadolint:1": {}
