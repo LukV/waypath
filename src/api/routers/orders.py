@@ -27,8 +27,6 @@ class ModelOption(str, Enum):  # noqa: D101
 
 router = APIRouter()
 
-SUPPORTED_EXTENSIONS = {".pdf", ".doc", ".docx", ".md", ".txt", ".html"}
-
 
 @router.post("/", response_model=order_schemas.OrderResponse)
 async def create_order(
@@ -52,13 +50,6 @@ async def generate(
     """Receive a document and return structured Order data."""
     suffix = Path(file.filename or "").suffix.lower()
 
-    if suffix not in SUPPORTED_EXTENSIONS:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Unsupported file type: {suffix}. \
-                Must be one of {', '.join(SUPPORTED_EXTENSIONS)}",
-        )
-
     if parser not in PARSER_REGISTRY:
         raise HTTPException(status_code=400, detail=f"Unknown parser: {parser}")
     if model not in EXTRACTOR_REGISTRY:
@@ -70,8 +61,13 @@ async def generate(
             tmp.write(contents)
             tmp_path = Path(tmp.name)
 
+        try:
+            parser_instance = PARSER_REGISTRY[parser](tmp_path, "en")
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
         pipeline = DocumentPipeline(
-            parser=PARSER_REGISTRY[parser](tmp_path, "en"),
+            parser=parser_instance,
             extractor=EXTRACTOR_REGISTRY[model](),
         )
         return await pipeline.run()

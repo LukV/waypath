@@ -9,8 +9,8 @@ from core.services.parsers.base import AbstractDocumentParser
 from core.services.parsers.llamaparse_parser import LlamaParseParser
 
 PARSER_REGISTRY: dict[str, Callable[[Path, str], AbstractDocumentParser]] = {
-    "llamaparse": lambda path, lang: LlamaParseParser(path=path, language=lang),
-    "azure": lambda path, lang: AzureDocumentParser(path=str(path), language=lang),
+    "llamaparse": lambda path, lang: LlamaParseParser(path=Path(path), language=lang),
+    "azure": lambda path, lang: AzureDocumentParser(path=Path(path), language=lang),
 }
 
 EXTRACTOR_REGISTRY: dict[str, type[AbstractOrderExtractor]] = {
