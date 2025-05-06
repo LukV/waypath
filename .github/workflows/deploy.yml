@@ -37,7 +37,7 @@ jobs:
           python-version: "3.12"
           cache: poetry
           cache-dependency-path: poetry.lock
-      
+
       - name: "🐍 Select Python for Poetry"
         run: poetry env use "${{ steps.python.outputs.python-path }}"
 
@@ -90,4 +90,11 @@ jobs:
               SECRET_KEY=${{ secrets.SECRET_KEY }} \
               SQLALCHEMY_DATABASE_URL=${{ secrets.SQLALCHEMY_DATABASE_URL }} \
               ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }} \
-              REFRESH_TOKEN_EXPIRE_DAYS=${{ secrets.REFRESH_TOKEN_EXPIRE_DAYS }}
+              REFRESH_TOKEN_EXPIRE_DAYS=${{ secrets.REFRESH_TOKEN_EXPIRE_DAYS }} \
+              LLAMA_CLOUD_API_KEY=${{ secrets.LLAMA_CLOUD_API_KEY }} \
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+              AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }} \
+              AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}
+              AZURE_DI_KEY=${{ secrets.AZURE_DI_KEY }} \
+              AZURE_DI_ENDPOINT=${{ secrets.AZURE_DI_ENDPOINT }} \
+              MAILGUN_API_KEY=${{ secrets.MAILGUN_API_KEY }} \

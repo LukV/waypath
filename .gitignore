@@ -183,7 +183,10 @@ cython_debug/
 *.tfstate
 *.backup
 
-# LVE add egg-info
+# LVE add user data
 *.egg-info/
+
+# LVE add user data
 *.db
 testdata/
+inbox/
