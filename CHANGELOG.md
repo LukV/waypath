@@ -1,7 +1,8 @@
-## v0.19.0 (2025-05-04)
+## v0.20.0 (2025-05-06)
 
 ### Feat
 
+- accept mail messages at /inbound-emails
 - support azure DI and azure OpenAI as parser and extractors
 - add hello cli endpoint
 - store orders in a database
