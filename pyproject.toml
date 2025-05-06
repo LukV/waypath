@@ -24,6 +24,7 @@ llama-cloud-services = "^0.6.20"
 pydantic-ai = "^0.1.8"
 python-multipart = "^0.0.20"
 azure-ai-formrecognizer = "^3.3.3"
+sqlalchemy-pagination = "^0.0.2"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.11.7"
@@ -59,5 +60,5 @@ update_changelog_on_bump = true
 version_provider = "poetry"
 
 [[tool.mypy.overrides]]
-module = "llama_cloud_services.*"
+module = ["sqlalchemy_pagination.*", "llama_cloud_services.*"]
 ignore_missing_imports = true

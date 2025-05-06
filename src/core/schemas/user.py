@@ -55,3 +55,27 @@ class UserResponse(BaseModel):  # noqa: D101
     )
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserUpdate(BaseModel):  # noqa: D101
+    username: str | None = Field(
+        None,
+        min_length=3,
+        max_length=50,
+        description="The updated username. Must be unique.",
+    )
+    email: EmailStr | None = Field(
+        None, description="The updated email address. Must be unique."
+    )
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AdminUserUpdate(UserUpdate):  # noqa: D101
+    role: str | None = Field(
+        None, description="The role of the user. Only settable by admins."
+    )
+
+
+class AdminUserResponse(UserResponse):  # noqa: D101
+    role: str  # Include 'role' only for admin responses

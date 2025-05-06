@@ -30,7 +30,7 @@ async def login(
         raise HTTPException(status_code=400, detail="Invalid credentials.")
 
     access_token = await auth.create_access_token(data={"sub": user.email})
-    refresh_token = auth.create_refresh_token(data={"sub": user.email})
+    refresh_token = await auth.create_refresh_token(data={"sub": user.email})
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -66,7 +66,7 @@ async def refresh_token(
 
         # Generate new access and refresh tokens
         access_token = await auth.create_access_token(data={"sub": email})
-        new_refresh_token = auth.create_refresh_token(data={"sub": email})
+        new_refresh_token = await auth.create_refresh_token(data={"sub": email})
         return {  # noqa: TRY300
             "access_token": access_token,
             "refresh_token": new_refresh_token,
