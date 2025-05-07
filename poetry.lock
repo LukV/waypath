@@ -203,13 +203,13 @@ trio = ["trio (>=0.26.1)"]
 
 [[package]]
 name = "argcomplete"
-version = "3.5.3"
+version = "3.6.2"
 description = "Bash tab completion for argparse"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "argcomplete-3.5.3-py3-none-any.whl", hash = "sha256:2ab2c4a215c59fd6caaff41a869480a23e8f6a5f910b266c1808037f4e375b61"},
-    {file = "argcomplete-3.5.3.tar.gz", hash = "sha256:c12bf50eded8aebb298c7b7da7a5ff3ee24dffd9f5281867dfe1424b58c55392"},
+    {file = "argcomplete-3.6.2-py3-none-any.whl", hash = "sha256:65b3133a29ad53fb42c48cf5114752c7ab66c1c38544fdf6460f450c09b42591"},
+    {file = "argcomplete-3.6.2.tar.gz", hash = "sha256:d0519b1bc867f5f4f4713c41ad0aba73a4a5f007449716b16f385f2166dc6adf"},
 ]
 
 [package.extras]
@@ -368,17 +368,17 @@ all = ["litellm", "redis"]
 
 [[package]]
 name = "boto3"
-version = "1.38.8"
+version = "1.38.10"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "boto3-1.38.8-py3-none-any.whl", hash = "sha256:f3a4d79f499f567d327d2d8846d02ad18244d2927f88858a42a2438f52d9a0ef"},
-    {file = "boto3-1.38.8.tar.gz", hash = "sha256:6bbc75bb51be9c5a33d07a4adf13d133c60f77b7c47bef1c46fda90b1297a867"},
+    {file = "boto3-1.38.10-py3-none-any.whl", hash = "sha256:26113a47d549bc3c46dbf56c8ab74f272c3da55df23e2c460fcf3c6c64d54dce"},
+    {file = "boto3-1.38.10.tar.gz", hash = "sha256:af4c78a3faa1a56cbaeb9e06cd5580772138be519fc6e740b81db586d5d1910c"},
 ]
 
 [package.dependencies]
-botocore = ">=1.38.8,<1.39.0"
+botocore = ">=1.38.10,<1.39.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.12.0,<0.13.0"
 
@@ -387,13 +387,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.38.8"
+version = "1.38.10"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "botocore-1.38.8-py3-none-any.whl", hash = "sha256:f6ae08a56fe94e18d2aa223611a3b5e94123315d0cb3cb85764b029b2326c710"},
-    {file = "botocore-1.38.8.tar.gz", hash = "sha256:68d739300cc94232373517b27c5570de6ae6d809a2db644f30219f5c8e0371ce"},
+    {file = "botocore-1.38.10-py3-none-any.whl", hash = "sha256:5244454bb9e8fbb6510145d1554e82fd243e8583507d83077ecf4f8efb66cb46"},
+    {file = "botocore-1.38.10.tar.gz", hash = "sha256:c531c13803e0fad5b395c5ccab4c11ac88acfccde71c9b998df6fa841392a8fc"},
 ]
 
 [package.dependencies]
@@ -587,17 +587,17 @@ files = [
 
 [[package]]
 name = "commitizen"
-version = "4.6.0"
+version = "4.6.2"
 description = "Python commitizen client tool"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "commitizen-4.6.0-py3-none-any.whl", hash = "sha256:d8861707b553c03c8b1993b7abd9e036384fdd1c57f95f6f38d5f215c53041a9"},
-    {file = "commitizen-4.6.0.tar.gz", hash = "sha256:cc1c9f8937e59a7c54321443aa49dd246e07b829e305c7cbff1d7f7e32e449fe"},
+    {file = "commitizen-4.6.2-py3-none-any.whl", hash = "sha256:2c5bfa5d0350bd1d5c813de96ed318bc0dd7286fe2c43066b260b16cfc0df9b0"},
+    {file = "commitizen-4.6.2.tar.gz", hash = "sha256:82ed227ac3978338809b15dade8d58e88e3d0266f3aac5ac4e75f2a93ae7340e"},
 ]
 
 [package.dependencies]
-argcomplete = ">=1.12.1,<3.6"
+argcomplete = ">=1.12.1,<3.7"
 charset-normalizer = ">=2.1.0,<4"
 colorama = ">=0.4.1,<1.0"
 decli = ">=0.6.0,<1.0"
@@ -1011,13 +1011,13 @@ tqdm = ["tqdm"]
 
 [[package]]
 name = "google-auth"
-version = "2.39.0"
+version = "2.40.0"
 description = "Google Authentication Library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google_auth-2.39.0-py2.py3-none-any.whl", hash = "sha256:0150b6711e97fb9f52fe599f55648950cc4540015565d8fbb31be2ad6e1548a2"},
-    {file = "google_auth-2.39.0.tar.gz", hash = "sha256:73222d43cdc35a3aeacbfdcaf73142a97839f10de930550d89ebfe1d0a00cde7"},
+    {file = "google_auth-2.40.0-py2.py3-none-any.whl", hash = "sha256:dc3a5078acb1043c3e43685c22d628afe40af8559cf561de388e0c939280fcc8"},
+    {file = "google_auth-2.40.0.tar.gz", hash = "sha256:c277cf39f7c192d8540eb6331c08b5a0796e8041af8343ae73dd6b269732ca6c"},
 ]
 
 [package.dependencies]
@@ -1415,13 +1415,13 @@ files = [
 
 [[package]]
 name = "joblib"
-version = "1.4.2"
+version = "1.5.0"
 description = "Lightweight pipelining with Python functions"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "joblib-1.4.2-py3-none-any.whl", hash = "sha256:06d478d5674cbc267e7496a410ee875abd68e4340feff4490bcb7afb88060ae6"},
-    {file = "joblib-1.4.2.tar.gz", hash = "sha256:2382c5816b2636fbd20a09e0f4e9dad4736765fdfb7dca582943b9c1366b3f0e"},
+    {file = "joblib-1.5.0-py3-none-any.whl", hash = "sha256:206144b320246485b712fc8cc51f017de58225fa8b414a1fe1764a7231aca491"},
+    {file = "joblib-1.5.0.tar.gz", hash = "sha256:d8757f955389a3dd7a23152e43bc297c2e0c2d3060056dad0feefc88a06939b5"},
 ]
 
 [[package]]
@@ -2393,31 +2393,31 @@ timezone = ["tzdata"]
 
 [[package]]
 name = "pydantic-ai"
-version = "0.1.9"
+version = "0.1.10"
 description = "Agent Framework / shim to use Pydantic with LLMs"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pydantic_ai-0.1.9-py3-none-any.whl", hash = "sha256:45aefd139f24723c7410f77d65e4512a9c5895cecbe128cd48b63a2958561e5e"},
-    {file = "pydantic_ai-0.1.9.tar.gz", hash = "sha256:bf0002fc86f7cd23ab32c4be26320af386453c1b4d134fdd7b5c919442fab8a1"},
+    {file = "pydantic_ai-0.1.10-py3-none-any.whl", hash = "sha256:5441cb5e2d80239737d1990f789626d55fa7da2e0d103c3d99bc9e1152209d9c"},
+    {file = "pydantic_ai-0.1.10.tar.gz", hash = "sha256:393c27cd3d86c6c505ac7d78ba740f4a27419d737938640775929deab1c8ccf8"},
 ]
 
 [package.dependencies]
-pydantic-ai-slim = {version = "0.1.9", extras = ["anthropic", "bedrock", "cli", "cohere", "evals", "groq", "mcp", "mistral", "openai", "vertexai"]}
+pydantic-ai-slim = {version = "0.1.10", extras = ["anthropic", "bedrock", "cli", "cohere", "evals", "groq", "mcp", "mistral", "openai", "vertexai"]}
 
 [package.extras]
-examples = ["pydantic-ai-examples (==0.1.9)"]
+examples = ["pydantic-ai-examples (==0.1.10)"]
 logfire = ["logfire (>=3.11.0)"]
 
 [[package]]
 name = "pydantic-ai-slim"
-version = "0.1.9"
+version = "0.1.10"
 description = "Agent Framework / shim to use Pydantic with LLMs, slim package"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pydantic_ai_slim-0.1.9-py3-none-any.whl", hash = "sha256:2f085acf90bd0f5d39dabc84f100b7bc7ee804f579f15868bb1afa5302328e19"},
-    {file = "pydantic_ai_slim-0.1.9.tar.gz", hash = "sha256:bd8b52fc75091b5dd15617b8e2d495545b2a506f1c02d43bfb3d809f496092b4"},
+    {file = "pydantic_ai_slim-0.1.10-py3-none-any.whl", hash = "sha256:d979492640bb43debefa842728c019eb8159302fe0e9fc423c9f4c1480906f4e"},
+    {file = "pydantic_ai_slim-0.1.10.tar.gz", hash = "sha256:c8ce4e04d014a0061d1a4cf9a76006cfacf6ee7214c572458550b05e878f832d"},
 ]
 
 [package.dependencies]
@@ -2436,8 +2436,8 @@ openai = {version = ">=1.75.0", optional = true, markers = "extra == \"openai\""
 opentelemetry-api = ">=1.28.0"
 prompt-toolkit = {version = ">=3", optional = true, markers = "extra == \"cli\""}
 pydantic = ">=2.10"
-pydantic-evals = {version = "0.1.9", optional = true, markers = "extra == \"evals\""}
-pydantic-graph = "0.1.9"
+pydantic-evals = {version = "0.1.10", optional = true, markers = "extra == \"evals\""}
+pydantic-graph = "0.1.10"
 requests = {version = ">=2.32.2", optional = true, markers = "extra == \"vertexai\""}
 rich = {version = ">=13", optional = true, markers = "extra == \"cli\""}
 typing-inspection = ">=0.4.0"
@@ -2448,7 +2448,7 @@ bedrock = ["boto3 (>=1.35.74)"]
 cli = ["argcomplete (>=3.5.0)", "prompt-toolkit (>=3)", "rich (>=13)"]
 cohere = ["cohere (>=5.13.11)"]
 duckduckgo = ["duckduckgo-search (>=7.0.0)"]
-evals = ["pydantic-evals (==0.1.9)"]
+evals = ["pydantic-evals (==0.1.10)"]
 groq = ["groq (>=0.15.0)"]
 logfire = ["logfire (>=3.11.0)"]
 mcp = ["mcp (>=1.6.0)"]
@@ -2570,20 +2570,20 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
 name = "pydantic-evals"
-version = "0.1.9"
+version = "0.1.10"
 description = "Framework for evaluating stochastic code execution, especially code making use of LLMs"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pydantic_evals-0.1.9-py3-none-any.whl", hash = "sha256:26253d7346455161c74175a76fdb9ad65f4e062a8a886e2d4a14d81f464036a6"},
-    {file = "pydantic_evals-0.1.9.tar.gz", hash = "sha256:923d64ba57ba1edcfaadb91a61c6ad4dc7c4a96169ca93ce04f48bcbd6777257"},
+    {file = "pydantic_evals-0.1.10-py3-none-any.whl", hash = "sha256:4a2739010120f44daa9c96117aa72ae4649584040764c34f3ecdb1065b50306e"},
+    {file = "pydantic_evals-0.1.10.tar.gz", hash = "sha256:8303242bce0f56b587126dcd60624333ca0ba18401f68935217466627fba1831"},
 ]
 
 [package.dependencies]
 anyio = ">=0"
 logfire-api = ">=1.2.0"
 pydantic = ">=2.10"
-pydantic-ai-slim = "0.1.9"
+pydantic-ai-slim = "0.1.10"
 pyyaml = ">=6.0.2"
 rich = ">=13.9.4"
 
@@ -2592,13 +2592,13 @@ logfire = ["logfire (>=2.3)"]
 
 [[package]]
 name = "pydantic-graph"
-version = "0.1.9"
+version = "0.1.10"
 description = "Graph and state machine library"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pydantic_graph-0.1.9-py3-none-any.whl", hash = "sha256:8fbbe31bb402b45d27ccb2b12b60d4bf103a9fe65e2c996fecc8eb943175ece7"},
-    {file = "pydantic_graph-0.1.9.tar.gz", hash = "sha256:bfb9efcd586fbd741fd026f57d699df13a069a3810449dde29219469de28c58d"},
+    {file = "pydantic_graph-0.1.10-py3-none-any.whl", hash = "sha256:56ba6bebe86e7e61cdc0e0ab36e07fe0a43931d949b89ec16c81cc70e2e6473c"},
+    {file = "pydantic_graph-0.1.10.tar.gz", hash = "sha256:dd7725f6a7c967d0dda8da72baba187cf4d85f1fc59f262b422591db20d738bd"},
 ]
 
 [package.dependencies]
@@ -3128,14 +3128,31 @@ pymysql = ["pymysql"]
 sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
+name = "sqlalchemy-pagination"
+version = "0.0.2"
+description = "A small utility to paginate SqlAlchemy queries."
+optional = false
+python-versions = "*"
+files = [
+    {file = "sqlalchemy-pagination-0.0.2.tar.gz", hash = "sha256:b199942239ac25aee7bb77fa5f1dd7a8cf3558a1d26e174cdd9463cfda45feec"},
+    {file = "sqlalchemy_pagination-0.0.2-py2.py3-none-any.whl", hash = "sha256:89141cf3ea132c2713be882e22e42b3224570c8a5a62c0d76ef34647073f9655"},
+]
+
+[package.dependencies]
+SqlAlchemy = "*"
+
+[package.extras]
+dev = ["SqlAlchemy", "coverage (==4.1b2)", "factory-boy (==2.10.0)", "flake8 (==2.5.4)", "flake8-debugger (==1.4.0)", "flake8-quotes (==0.2.4)", "nose (==1.3.7)", "pep8-naming (==0.3.3)", "rednose (==1.1.0)", "sure (==1.2.24)"]
+
+[[package]]
 name = "sse-starlette"
-version = "2.3.3"
+version = "2.3.4"
 description = "SSE plugin for Starlette"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "sse_starlette-2.3.3-py3-none-any.whl", hash = "sha256:8b0a0ced04a329ff7341b01007580dd8cf71331cc21c0ccea677d500618da1e0"},
-    {file = "sse_starlette-2.3.3.tar.gz", hash = "sha256:fdd47c254aad42907cfd5c5b83e2282be15be6c51197bf1a9b70b8e990522072"},
+    {file = "sse_starlette-2.3.4-py3-none-any.whl", hash = "sha256:b8100694f3f892b133d0f7483acb7aacfcf6ed60f863b31947664b6dc74e529f"},
+    {file = "sse_starlette-2.3.4.tar.gz", hash = "sha256:0ffd6bed217cdbb74a84816437c609278003998b4991cd2e6872d0b35130e4d5"},
 ]
 
 [package.dependencies]
@@ -3422,13 +3439,13 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 
 [[package]]
 name = "virtualenv"
-version = "20.30.0"
+version = "20.31.1"
 description = "Virtual Python Environment builder"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "virtualenv-20.30.0-py3-none-any.whl", hash = "sha256:e34302959180fca3af42d1800df014b35019490b119eba981af27f2fa486e5d6"},
-    {file = "virtualenv-20.30.0.tar.gz", hash = "sha256:800863162bcaa5450a6e4d721049730e7f2dae07720e0902b0e4040bd6f9ada8"},
+    {file = "virtualenv-20.31.1-py3-none-any.whl", hash = "sha256:f448cd2f1604c831afb9ea238021060be2c0edbcad8eb0a4e8b4e14ff11a5482"},
+    {file = "virtualenv-20.31.1.tar.gz", hash = "sha256:65442939608aeebb9284cd30baca5865fcd9f12b58bb740a24b220030df46d26"},
 ]
 
 [package.dependencies]
@@ -3679,4 +3696,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<4.0"
-content-hash = "3f57bc5d97276a4ae45682203a8a9ed7916bad412a79c5ecfd07f2b6b03a3a15"
+content-hash = "336f0a385296d110746b389f9095e50454298eeb9d13cae6aa04ffb4180ea465"

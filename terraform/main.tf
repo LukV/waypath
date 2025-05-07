@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 3.75.0"
+    }
+  }
+}
+
 provider "azurerm" {
   features {}
   subscription_id = "ce029a16-1901-40e0-81d2-660951841d59"
@@ -41,7 +50,7 @@ resource "azurerm_container_app" "app" {
       memory = "1.0Gi"
 
       env {
-        name      = "REGISTRY_PASSWORD"
+        name        = "REGISTRY_PASSWORD"
         secret_name = "registry-password"
       }
     }
@@ -62,4 +71,20 @@ resource "azurerm_container_app" "app" {
     username             = azurerm_container_registry.acr.admin_username
     password_secret_name = "registry-password"
   }
+}
+
+# --- Custom Domain & Certificate Binding ---
+
+resource "azurerm_container_app_managed_certificate" "waypath_cert" {
+  name               = "waypath-cert"
+  container_app_id   = azurerm_container_app.app.id
+  custom_domain_name = "api.waypath.be"
+}
+
+resource "azurerm_container_app_custom_domain" "waypath_custom_domain" {
+  name             = "api-waypath-be"
+  container_app_id = azurerm_container_app.app.id
+  hostname         = "api.waypath.be"
+  certificate_id   = azurerm_container_app_managed_certificate.waypath_cert.id
+  validation_type  = "CNAME"
 }

@@ -1,4 +1,7 @@
-from sqlalchemy import select
+from typing import Any
+
+from fastapi import HTTPException
+from sqlalchemy import asc, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -43,7 +46,6 @@ async def create_order(
     await db.commit()
     await db.refresh(db_order)
 
-    # Now load lines explicitly
     stmt = (
         select(models.Order)
         .options(selectinload(models.Order.lines))
@@ -51,3 +53,92 @@ async def create_order(
     )
     result = await db.execute(stmt)
     return result.scalar_one()
+
+
+async def update_order(
+    db: AsyncSession,
+    order_id: str,
+    order_update: order_schemas.OrderUpdate,
+) -> models.Order:
+    """Update an existing order's details in the database."""
+    stmt = select(models.Order).where(models.Order.id == order_id)
+    result = await db.execute(stmt)
+    db_order = result.scalar_one_or_none()
+    if not db_order:
+        raise HTTPException(status_code=404, detail="Order not found.")
+
+    update_data = order_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_order, key, value)
+
+    await db.commit()
+    await db.refresh(db_order)
+
+    return db_order
+
+
+async def delete_order(db: AsyncSession, order_id: str) -> models.Order | None:
+    """Delete an order from the database."""
+    stmt = select(models.Order).where(models.Order.id == order_id)
+    result = await db.execute(stmt)
+    db_order = result.scalar_one_or_none()
+    if db_order:
+        await db.delete(db_order)
+        await db.commit()
+    return db_order
+
+
+async def get_all_orders(  # noqa: PLR0913
+    db: AsyncSession,
+    current_user: models.User,
+    page: int,
+    per_page: int,
+    sort_by: str | None = None,
+    sort_order: str = "asc",
+) -> dict[str, Any]:
+    """Retrieve paginated orders with eager-loaded lines to avoid async errors."""
+    # Base query with eager loading
+    base_query = select(models.Order).options(selectinload(models.Order.lines))
+    count_query = select(func.count())
+
+    if current_user.role != "admin":
+        base_query = base_query.where(models.Order.created_by == current_user.id)
+        count_query = count_query.select_from(models.Order).where(
+            models.Order.created_by == current_user.id
+        )
+    else:
+        count_query = count_query.select_from(models.Order)
+
+    # Sorting
+    if sort_by:
+        sort_column = getattr(models.Order, sort_by, None)
+        if sort_column:
+            base_query = base_query.order_by(
+                desc(sort_column) if sort_order == "desc" else asc(sort_column)
+            )
+
+    # Pagination
+    offset = (page - 1) * per_page
+    paginated_query = base_query.offset(offset).limit(per_page)
+
+    total_items = (await db.execute(count_query)).scalar_one()
+    result = await db.execute(paginated_query)
+    orders = result.scalars().all()
+
+    return {
+        "total_pages": (total_items + per_page - 1) // per_page,
+        "total_items": total_items,
+        "current_page": page,
+        "items": orders,
+    }
+
+
+async def get_order_by_id(db: AsyncSession, order_id: str) -> models.Order | None:
+    """Fetch an order by its ID with lines eagerly loaded."""
+    stmt = (
+        select(models.Order)
+        .where(models.Order.id == order_id)
+        .options(selectinload(models.Order.lines))
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()

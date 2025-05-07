@@ -7,3 +7,8 @@ output "acr_login_server" {
   value       = azurerm_container_registry.acr.login_server
   description = "Login server of the Azure Container Registry"
 }
+
+output "custom_domain_url" {
+  value       = "https://api.waypath.be"
+  description = "Custom domain for the API"
+}
