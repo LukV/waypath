@@ -1,7 +1,8 @@
-## v0.20.0 (2025-05-06)
+## v0.21.0 (2025-05-07)
 
 ### Feat
 
+- add crud for user and order entities
 - accept mail messages at /inbound-emails
 - support azure DI and azure OpenAI as parser and extractors
 - add hello cli endpoint
