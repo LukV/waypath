@@ -91,8 +91,8 @@ class PasswordChange(BaseModel, PasswordValidationMixin):  # noqa: D101
     )
 
     @model_validator(mode="before")
-    async def validate_fields(self, values: dict[str, Any]) -> dict[str, Any]:  # noqa: D102
-        values["new_password"] = self.validate_password(values["new_password"])
+    def validate_fields(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: D102, N805
+        values["new_password"] = cls.validate_password(values["new_password"])
         return values
 
 
@@ -119,6 +119,6 @@ class PasswordReset(BaseModel, PasswordValidationMixin):  # noqa: D101
     )
 
     @model_validator(mode="before")
-    async def validate_fields(self, values: dict[str, Any]) -> dict[str, Any]:  # noqa: D102
-        values["new_password"] = self.validate_password(values["new_password"])
+    def validate_fields(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: D102, N805
+        values["new_password"] = cls.validate_password(values["new_password"])
         return values
