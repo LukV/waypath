@@ -98,3 +98,5 @@ jobs:
               AZURE_DI_KEY=${{ secrets.AZURE_DI_KEY }} \
               AZURE_DI_ENDPOINT=${{ secrets.AZURE_DI_ENDPOINT }} \
               MAILGUN_API_KEY=${{ secrets.MAILGUN_API_KEY }} \
+              MAILGUN_SIGNING_KEY=${{ secrets.MAILGUN_SIGNING_KEY }} \
+              RESET_PASSWORD_URL=${{ secrets.RESET_PASSWORD_URL }}
