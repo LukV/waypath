@@ -1,5 +1,6 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db.models import User
@@ -68,6 +69,27 @@ async def delete_user(db: AsyncSession, user_id: str) -> User | None:
     if db_user:
         await db.delete(db_user)
         await db.commit()
+    return db_user
+
+
+async def update_password(db: AsyncSession, user_id: str, new_password: str) -> User:
+    """Update an existing user's password in the database."""
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
+    db_user = result.scalar_one_or_none()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    try:
+        hashed_password = await auth.hash_password(new_password)
+        db_user.password = hashed_password
+        await db.commit()
+        await db.refresh(db_user)
+    except SQLAlchemyError as exc:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected database error occurred.",
+        ) from exc
     return db_user
 
 

@@ -79,3 +79,46 @@ class AdminUserUpdate(UserUpdate):  # noqa: D101
 
 class AdminUserResponse(UserResponse):  # noqa: D101
     role: str  # Include 'role' only for admin responses
+
+
+class PasswordChange(BaseModel, PasswordValidationMixin):  # noqa: D101
+    new_password: str = Field(
+        ...,
+        description=(
+            "The new password for the user. Must be 8-128 characters long and include "
+            "at least one letter and one number."
+        ),
+    )
+
+    @model_validator(mode="before")
+    def validate_fields(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: D102, N805
+        values["new_password"] = cls.validate_password(values["new_password"])
+        return values
+
+
+class PasswordResetRequest(BaseModel):  # noqa: D101
+    email: EmailStr = Field(
+        ..., description="The email address associated with the user account."
+    )
+
+
+class PasswordReset(BaseModel, PasswordValidationMixin):  # noqa: D101
+    email: EmailStr = Field(
+        ..., description="The email address associated with the user account."
+    )
+    new_password: str = Field(
+        ...,
+        description=(
+            "The new password for the user. Must be 8-128 characters long and include "
+            "at least one letter and one number."
+        ),
+    )
+    token: str = Field(
+        ...,
+        description="The token sent to the user for verifying the  reset request.",
+    )
+
+    @model_validator(mode="before")
+    def validate_fields(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: D102, N805
+        values["new_password"] = cls.validate_password(values["new_password"])
+        return values

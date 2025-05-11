@@ -1,13 +1,24 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from jose import jwt
+from jose.exceptions import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.crud import users as crud_users
 from core.db import models
 from core.schemas import user as user_schemas
-from core.utils.auth import get_current_user, is_admin, is_admin_or_entity_owner
+from core.utils.auth import (
+    ALGORITHM,
+    SECRET_KEY_BYTES,
+    create_password_reset_token,
+    get_current_user,
+    hash_password,
+    is_admin,
+    is_admin_or_entity_owner,
+)
 from core.utils.database import get_db
+from core.utils.sendmail import send_reset_email
 
 router = APIRouter()
 
@@ -109,3 +120,71 @@ async def delete_user(
 ) -> None:
     """Delete an existing user from the database. This is a hard delete."""
     await crud_users.delete_user(db, user_id)
+
+
+@router.post("/request-password-reset")
+async def request_password_reset(
+    payload: user_schemas.PasswordResetRequest,
+    background_tasks: BackgroundTasks,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> str:
+    """Request a password reset by sending a reset link to the user's email."""
+    user = await crud_users.get_user_by_email(db, email=payload.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    # Generate a token with an expiry
+    token = await create_password_reset_token(user.id)
+
+    # Add the email sending task to the background
+    background_tasks.add_task(send_reset_email, payload.email, token)
+
+    return "Password reset email sent."
+
+
+@router.post("/reset-password")
+async def reset_password(
+    payload: user_schemas.PasswordReset,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> dict[str, str]:
+    """Reset a user's password using a token for validation."""
+    try:
+        # Decode the token using the auth module
+        payload_data = jwt.decode(
+            payload.token, SECRET_KEY_BYTES, algorithms=[ALGORITHM]
+        )
+        user_uid = payload_data.get("sub")
+    except JWTError as exc:
+        raise HTTPException(
+            status_code=400, detail="Invalid or expired token."
+        ) from exc
+
+    # Verify that the email and user_uid match
+    user = await crud_users.get_user_by_email(db, email=payload.email)
+    if not user or str(user.id) != user_uid:
+        raise HTTPException(
+            status_code=404, detail="User not found, or email does not match token."
+        )
+
+    user.password = await hash_password(payload.new_password)
+    await db.commit()
+    return {
+        "detail": "Password reset successfully",
+    }
+
+
+@router.post("/change-password")
+async def change_password(
+    request: user_schemas.PasswordChange,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[models.User, Depends(get_current_user)],
+) -> str:
+    """Update the password for the authenticated user."""
+    updated_user = crud_users.update_password(
+        db=db, user_id=current_user.id, new_password=request.new_password
+    )
+    if not updated_user:
+        raise HTTPException(
+            status_code=404, detail="User not found or password could not be updated."
+        )
+    return "Password updated successfully."

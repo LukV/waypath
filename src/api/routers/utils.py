@@ -23,7 +23,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 INBOX_ROOT = Path("inbox")
-MAILGUN_API_KEY = os.environ["MAILGUN_API_KEY"]
+MAILGUN_SIGNING_KEY = os.environ["MAILGUN_SIGNING_KEY"]
 DEFAULT_PARSER = "llamaparse"
 DEFAULT_MODEL = "openai"
 
@@ -81,7 +81,7 @@ async def receive(  # noqa: PLR0913
     token = str(form.get("token"))
     signature = str(form.get("signature"))
 
-    if not is_valid_mailgun_signature(MAILGUN_API_KEY, timestamp, token, signature):
+    if not is_valid_mailgun_signature(MAILGUN_SIGNING_KEY, timestamp, token, signature):
         logger.warning("🚫 Invalid Mailgun signature")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Invalid signature"

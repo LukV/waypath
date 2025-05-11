@@ -78,6 +78,13 @@ async def create_refresh_token(data: dict[str, Any]) -> str:
     return str(jwt.encode(to_encode, SECRET_KEY_BYTES, algorithm=ALGORITHM))
 
 
+async def create_password_reset_token(user_id: str) -> str:
+    """Generate a password reset token for a given user ID."""
+    expires = datetime.now(UTC) + timedelta(hours=1)  # Token expires in 1 hour
+    to_encode = {"exp": expires, "sub": str(user_id)}
+    return str(jwt.encode(to_encode, SECRET_KEY_BYTES, algorithm=ALGORITHM))
+
+
 async def is_admin(
     current_user: Annotated[models.User, Depends(get_current_user)],
 ) -> models.User:
