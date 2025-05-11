@@ -1,7 +1,8 @@
-## v0.21.0 (2025-05-07)
+## v0.22.0 (2025-05-11)
 
 ### Feat
 
+- add reset passwords endpoints
 - add crud for user and order entities
 - accept mail messages at /inbound-emails
 - support azure DI and azure OpenAI as parser and extractors
@@ -17,6 +18,7 @@
 
 ### Fix
 
+- Change @model_validator async to sync for Pydantic v2
 - build fix error
 - fix build error
 - fix merge conflict
