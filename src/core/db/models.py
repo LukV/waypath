@@ -30,9 +30,7 @@ class Order(Base):  # noqa: D101
     id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
     customer_name: Mapped[str] = mapped_column(String, nullable=False)
     customer_address: Mapped[str] = mapped_column(String, nullable=False)
-    invoice_number: Mapped[str] = mapped_column(
-        String, unique=True, index=True, nullable=False
-    )
+    invoice_number: Mapped[str] = mapped_column(String, index=True, nullable=False)
     order_date: Mapped[str] = mapped_column(String, nullable=False)
     due_date: Mapped[str] = mapped_column(String, nullable=False)
     total_excl_vat: Mapped[float] = mapped_column(Float, nullable=False)
