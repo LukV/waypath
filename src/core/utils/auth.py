@@ -97,7 +97,7 @@ async def is_admin(
 def is_admin_or_entity_owner(
     entity_getter: Callable[[AsyncSession, str], Awaitable[Base]],
     entity_name: str = "Entity",
-    ownership_field: str = "user_id",
+    ownership_field: str = "created_by",
     entity_id_param: str = "entity_id",
 ) -> Callable[..., Awaitable[models.User]]:
     """Return a dependency that verifies if the current user is admin or the owner."""

@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from core.utils.config import OrderStatus
+
 
 class OrderLine(BaseModel):  # noqa: D101
     product_code: str = Field(..., description="Product code or SKU")
@@ -22,6 +24,7 @@ class Order(BaseModel):  # noqa: D101
     total_excl_vat: float = Field(..., description="Total amount excluding VAT in EUR")
     vat: float = Field(..., description="VAT amount in EUR")
     total_incl_vat: float = Field(..., description="Total amount including VAT in EUR")
+    status: OrderStatus = Field(..., description="Order processing status")
     lines: list[OrderLine] = Field(..., description="Line items in the order")
 
     model_config = ConfigDict(from_attributes=True)
@@ -46,6 +49,7 @@ class OrderUpdate(BaseModel):  # noqa: D101
     total_incl_vat: float | None = Field(
         None, description="Total amount including VAT in EUR"
     )
+    status: OrderStatus | None = Field(None, description="Order processing status")
     lines: list[OrderLine] | None = Field(None, description="Line items in the order")
 
     model_config = {"extra": "forbid"}

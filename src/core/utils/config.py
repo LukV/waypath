@@ -1,5 +1,18 @@
+from enum import Enum
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+
+class OrderStatus(str, Enum):  # noqa: D101
+    PROCESSING = "processing"
+    TO_ACCEPT = "to_accept"
+    ACCEPTED = "accepted"
+    ARCHIVED = "archived"
+    DELETED = "deleted"
+    FAILED = "failed"
+    REJECTED = "rejected"
+    NEEDS_REVIEW = "needs_review"
 
 
 def setup_cors(app: FastAPI) -> None:
