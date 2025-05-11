@@ -1,7 +1,9 @@
-## v0.22.0 (2025-05-11)
+## v0.23.0 (2025-05-11)
 
 ### Feat
 
+- remove unique constraint for order numbers
+- add order processing status
 - add reset passwords endpoints
 - add crud for user and order entities
 - accept mail messages at /inbound-emails
