@@ -1,7 +1,9 @@
 from sqlalchemy import DateTime, Float, ForeignKey, String
+from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
+from core.utils.config import OrderStatus
 from core.utils.database import Base
 
 
@@ -28,9 +30,7 @@ class Order(Base):  # noqa: D101
     id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
     customer_name: Mapped[str] = mapped_column(String, nullable=False)
     customer_address: Mapped[str] = mapped_column(String, nullable=False)
-    invoice_number: Mapped[str] = mapped_column(
-        String, unique=True, index=True, nullable=False
-    )
+    invoice_number: Mapped[str] = mapped_column(String, index=True, nullable=False)
     order_date: Mapped[str] = mapped_column(String, nullable=False)
     due_date: Mapped[str] = mapped_column(String, nullable=False)
     total_excl_vat: Mapped[float] = mapped_column(Float, nullable=False)
@@ -45,6 +45,11 @@ class Order(Base):  # noqa: D101
 
     lines: Mapped[list["OrderLine"]] = relationship(
         "OrderLine", back_populates="order", cascade="all, delete-orphan"
+    )
+    status: Mapped[OrderStatus] = mapped_column(
+        SqlEnum(OrderStatus, name="orderstatus"),
+        nullable=False,
+        default=OrderStatus.TO_ACCEPT,
     )
     user: Mapped["User"] = relationship("User", back_populates="orders")
 

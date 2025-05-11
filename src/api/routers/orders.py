@@ -110,7 +110,9 @@ async def update_order(
 ) -> order_schemas.OrderResponse:
     """Update an existing order's details."""
     updated_order = await crud_orders.update_order(db, order_id, order_update)
-    return order_schemas.OrderResponse.model_validate(updated_order)
+    return order_schemas.OrderResponse.model_validate(
+        updated_order, from_attributes=True
+    )
 
 
 @router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
