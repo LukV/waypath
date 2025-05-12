@@ -57,6 +57,12 @@ async def get_all_orders(  # noqa: PLR0913
         str,
         Query(regex="^(asc|desc)$", description="Sort order ('asc' or 'desc')"),
     ] = "asc",
+    query: Annotated[
+        str | None,
+        Query(
+            description="Free text search in customer name, address, or invoice number"
+        ),
+    ] = None,
 ) -> PaginatedResponse[order_schemas.OrderResponse]:
     """Retrieve a list of all users in the database."""
     orders = await crud_orders.get_all_orders(
@@ -66,6 +72,7 @@ async def get_all_orders(  # noqa: PLR0913
         per_page=per_page,
         sort_by=sort_by,
         sort_order=sort_order,
+        search_query=query,
     )
 
     return PaginatedResponse(
