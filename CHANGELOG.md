@@ -1,7 +1,10 @@
-## v0.24.0 (2025-05-12)
+## v0.25.0 (2025-05-12)
 
 ### Feat
 
+- support doc upload from web site
+- search orders by name, address and invoice number
+- add order stats
 - remove unique constraint for order numbers
 - add order processing status
 - add reset passwords endpoints
