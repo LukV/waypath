@@ -1,4 +1,4 @@
-## v0.23.0 (2025-05-11)
+## v0.24.0 (2025-05-12)
 
 ### Feat
 
@@ -20,6 +20,7 @@
 
 ### Fix
 
+- **Dockerfile**: trust Azure’s X-Forwarded-Proto: https header and preserve the original HTTPS scheme
 - Change @model_validator async to sync for Pydantic v2
 - build fix error
 - fix build error
