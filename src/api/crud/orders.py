@@ -149,3 +149,21 @@ async def get_order_by_id(db: AsyncSession, order_id: str) -> models.Order | Non
     )
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
+
+
+async def get_order_counts(
+    db: AsyncSession, current_user: models.User
+) -> dict[str, int]:
+    """Return total order count and count per status."""
+    stmt = select(models.Order.status, func.count().label("count")).group_by(
+        models.Order.status
+    )
+
+    if current_user.role != "admin":
+        stmt = stmt.where(models.Order.created_by == current_user.id)
+
+    result = await db.execute(stmt)
+    counts = {row._mapping["status"]: row._mapping["count"] for row in result.all()}  # noqa: SLF001
+
+    total = sum(counts.values())
+    return {"total": total, **counts}

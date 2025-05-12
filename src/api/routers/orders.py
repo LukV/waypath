@@ -79,6 +79,16 @@ async def get_all_orders(  # noqa: PLR0913
     )
 
 
+@router.get("/stats", response_model=order_schemas.OrderCounts)
+async def get_order_stats(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[models.User, Depends(get_current_user)],
+) -> order_schemas.OrderCounts:
+    """Get total number of orders and counts per status."""
+    counts = await crud_orders.get_order_counts(db, current_user)
+    return order_schemas.OrderCounts(**counts)
+
+
 @router.get("/{order_id}", response_model=order_schemas.OrderResponse)
 async def get_order(
     order_id: str,
