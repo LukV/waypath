@@ -59,3 +59,15 @@ class OrderResponse(Order):  # noqa: D101
     id: str
     created_at: datetime
     created_by: str  # user ID
+
+
+class OrderCounts(BaseModel):  # noqa: D101
+    total: int
+    processing: int | None = 0
+    to_accept: int | None = 0
+    accepted: int | None = 0
+    archived: int | None = 0
+    deleted: int | None = 0
+    failed: int | None = 0
+    rejected: int | None = 0
+    needs_review: int | None = 0

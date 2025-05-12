@@ -1,7 +1,7 @@
 from typing import Any
 
 from fastapi import HTTPException
-from sqlalchemy import asc, desc, func, select
+from sqlalchemy import asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -102,9 +102,9 @@ async def get_all_orders(  # noqa: PLR0913
     per_page: int,
     sort_by: str | None = None,
     sort_order: str = "asc",
+    search_query: str | None = None,
 ) -> dict[str, Any]:
-    """Retrieve paginated orders with eager-loaded lines to avoid async errors."""
-    # Base query with eager loading
+    """Retrieve paginated orders with eager-loaded lines, optional text search."""
     base_query = select(models.Order).options(selectinload(models.Order.lines))
     count_query = select(func.count())
 
@@ -116,6 +116,26 @@ async def get_all_orders(  # noqa: PLR0913
     else:
         count_query = count_query.select_from(models.Order)
 
+    # Search logic
+    if search_query:
+        tokens = search_query.strip().split()
+        for token in tokens:
+            ilike_token = f"%{token}%"
+            base_query = base_query.where(
+                or_(
+                    models.Order.customer_name.ilike(ilike_token),
+                    models.Order.customer_address.ilike(ilike_token),
+                    models.Order.invoice_number.ilike(ilike_token),
+                )
+            )
+            count_query = count_query.where(
+                or_(
+                    models.Order.customer_name.ilike(ilike_token),
+                    models.Order.customer_address.ilike(ilike_token),
+                    models.Order.invoice_number.ilike(ilike_token),
+                )
+            )
+
     # Sorting
     if sort_by:
         sort_column = getattr(models.Order, sort_by, None)
@@ -124,7 +144,6 @@ async def get_all_orders(  # noqa: PLR0913
                 desc(sort_column) if sort_order == "desc" else asc(sort_column)
             )
 
-    # Pagination
     offset = (page - 1) * per_page
     paginated_query = base_query.offset(offset).limit(per_page)
 
@@ -149,3 +168,21 @@ async def get_order_by_id(db: AsyncSession, order_id: str) -> models.Order | Non
     )
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
+
+
+async def get_order_counts(
+    db: AsyncSession, current_user: models.User
+) -> dict[str, int]:
+    """Return total order count and count per status."""
+    stmt = select(models.Order.status, func.count().label("count")).group_by(
+        models.Order.status
+    )
+
+    if current_user.role != "admin":
+        stmt = stmt.where(models.Order.created_by == current_user.id)
+
+    result = await db.execute(stmt)
+    counts = {row._mapping["status"]: row._mapping["count"] for row in result.all()}  # noqa: SLF001
+
+    total = sum(counts.values())
+    return {"total": total, **counts}
