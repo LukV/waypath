@@ -7,15 +7,26 @@ from typing import Annotated
 
 import anyio
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.datastructures import UploadFile
+from starlette.datastructures import UploadFile as StarletteUploadFile
 
 from api.crud import orders as crud_orders
 from api.crud import users as crud_users
+from core.db import models
 from core.logic.pipeline import DocumentPipeline
 from core.schemas import order as order_schemas
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
+from core.utils.auth import get_current_user
 from core.utils.database import get_db
 
 load_dotenv()
@@ -40,7 +51,7 @@ def is_valid_mailgun_signature(
         key = api_key.encode("utf-8")
         expected = hmac.new(key, message, hashlib.sha256).hexdigest()
         return hmac.compare_digest(expected, signature)
-    except Exception:  # noqa: BLE001
+    except (ValueError, TypeError):
         return False
 
 
@@ -56,7 +67,7 @@ def is_dangerous_file(filename: str) -> bool:
     return Path(filename).suffix.lower() in forbidden_extensions
 
 
-@router.post("/inbound-email")
+@router.post("/inbound-email", response_model=list[order_schemas.OrderResponse])
 async def receive(  # noqa: PLR0913
     request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -65,8 +76,8 @@ async def receive(  # noqa: PLR0913
     subject: Annotated[str | None, Form()] = None,
     body_plain: Annotated[str | None, Form()] = None,  # noqa: ARG001
     body_html: Annotated[str | None, Form()] = None,  # noqa: ARG001
-) -> order_schemas.OrderResponse:
-    """Process incoming email data and securely save attachments."""
+) -> list[order_schemas.OrderResponse]:
+    """Process incoming email and parse all valid attachments."""
     logger.info("✅ Received inbound email from %s", sender)
 
     if not sender or not subject:
@@ -76,26 +87,28 @@ async def receive(  # noqa: PLR0913
         )
 
     form = await request.form()
-
-    timestamp = str(form.get("timestamp"))
-    token = str(form.get("token"))
-    signature = str(form.get("signature"))
-
-    if not is_valid_mailgun_signature(MAILGUN_SIGNING_KEY, timestamp, token, signature):
+    if not is_valid_mailgun_signature(
+        MAILGUN_SIGNING_KEY,
+        str(form.get("timestamp")),
+        str(form.get("token")),
+        str(form.get("signature")),
+    ):
         logger.warning("🚫 Invalid Mailgun signature")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Invalid signature"
         )
 
-    logger.info(f"📧 From: {sender}")
-    logger.info(f"📨 Subject: {subject}")
+    user = await crud_users.get_user_by_email(db, sender)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
-    timestamp = datetime.now(tz=UTC).strftime("%Y%m%d-%H%M%S")
-    inbox_path = INBOX_ROOT / timestamp
+    inbox_path = INBOX_ROOT / datetime.now(tz=UTC).strftime("%Y%m%d-%H%M%S")
     inbox_path.mkdir(parents=True, exist_ok=True)
 
+    results = []
+
     for _, value in form.multi_items():
-        if isinstance(value, UploadFile):
+        if isinstance(value, StarletteUploadFile):
             raw_name = value.filename or "attachment.bin"
             filename = sanitize_filename(raw_name)
 
@@ -110,26 +123,65 @@ async def receive(  # noqa: PLR0913
 
             logger.info(f"📎 Saved attachment: {file_path}")
 
-            # Apply the parsing pipeline (only on first valid file)
             try:
-                parser = PARSER_REGISTRY[DEFAULT_PARSER](file_path, "en")
-                extractor = EXTRACTOR_REGISTRY[DEFAULT_MODEL]()
-                pipeline = DocumentPipeline(parser=parser, extractor=extractor)
-                parsed_order = await pipeline.run()
-
-                # Store in DB
-                order_create = order_schemas.OrderCreate(**parsed_order.model_dump())
-                user = await crud_users.get_user_by_email(db, sender)
-                if user is None:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-                    )
-                created_order = await crud_orders.create_order(db, order_create, user)
-
-                return order_schemas.OrderResponse.model_validate(
-                    created_order, from_attributes=True
+                order = await process_uploaded_order(
+                    db=db, user=user, file_path=file_path
                 )
+                results.append(order)
             finally:
                 file_path.unlink(missing_ok=True)
 
-    raise HTTPException(status_code=422, detail="No valid attachments found")
+    if not results:
+        raise HTTPException(status_code=422, detail="No valid attachments found")
+
+    return results
+
+
+@router.post("/upload", response_model=order_schemas.OrderResponse)
+async def upload_order_from_web(
+    file: Annotated[UploadFile, File(...)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[models.User, Depends(get_current_user)],
+) -> order_schemas.OrderResponse:
+    """Support authenticated frontend users uploading a document."""
+    logger.info("🌐 Received upload from %s", current_user.email)
+    return await process_uploaded_order(file=file, db=db, user=current_user)
+
+
+async def process_uploaded_order(
+    db: AsyncSession,
+    user: models.User,
+    file: UploadFile | None = None,
+    file_path: Path | None = None,
+    lang: str = "en",
+) -> order_schemas.OrderResponse:
+    """Shared logic to process uploaded file and store resulting Order."""
+    if file is not None:
+        if is_dangerous_file(file.filename or "unknown"):
+            raise HTTPException(status_code=400, detail="Dangerous file type")
+        tmp_path = Path(f"/tmp/{sanitize_filename(file.filename or 'unknown')}")  # noqa: S108
+        async with await anyio.open_file(tmp_path, "wb") as f:
+            content = await file.read()
+            await f.write(content)
+        delete_after = True
+    elif file_path is not None:
+        tmp_path = file_path
+        delete_after = False
+    else:
+        raise ValueError("Provide file or file_path")  # noqa: TRY003
+
+    try:
+        parser = PARSER_REGISTRY[DEFAULT_PARSER](tmp_path, lang)
+        extractor = EXTRACTOR_REGISTRY[DEFAULT_MODEL]()
+        pipeline = DocumentPipeline(parser=parser, extractor=extractor)
+        parsed_order = await pipeline.run()
+
+        order_create = order_schemas.OrderCreate(**parsed_order.model_dump())
+        created_order = await crud_orders.create_order(db, order_create, user)
+
+        return order_schemas.OrderResponse.model_validate(
+            created_order, from_attributes=True
+        )
+    finally:
+        if delete_after:
+            tmp_path.unlink(missing_ok=True)

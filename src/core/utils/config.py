@@ -19,7 +19,7 @@ def setup_cors(app: FastAPI) -> None:
     """Set up CORS middleware for the FastAPI application."""
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=["http://localhost:8080", "https://www.waypath.be"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
