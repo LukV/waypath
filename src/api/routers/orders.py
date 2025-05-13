@@ -14,6 +14,7 @@ from core.schemas.common import PaginatedResponse
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
 from core.utils.auth import get_current_user, is_admin_or_entity_owner
 from core.utils.database import get_db
+from core.utils.idsvc import generate_id
 
 
 class ParserOption(str, Enum):  # noqa: D101
@@ -36,6 +37,8 @@ async def create_order(
     current_user: Annotated[models.User, Depends(get_current_user)],
 ) -> order_schemas.OrderResponse:
     """Create a new order in the database."""
+    order_id = generate_id("O")
+    order = order_schemas.OrderCreate(id=order_id, **order.model_dump(exclude={"id"}))
     created_order = await crud_orders.create_order(db, order, current_user)
     return order_schemas.OrderResponse.model_validate(
         created_order, from_attributes=True

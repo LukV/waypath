@@ -28,6 +28,7 @@ from core.schemas import order as order_schemas
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
 from core.utils.auth import get_current_user
 from core.utils.database import get_db
+from core.utils.idsvc import generate_id
 
 load_dotenv()
 router = APIRouter()
@@ -176,7 +177,11 @@ async def process_uploaded_order(
         pipeline = DocumentPipeline(parser=parser, extractor=extractor)
         parsed_order = await pipeline.run()
 
-        order_create = order_schemas.OrderCreate(**parsed_order.model_dump())
+        parsed_order_dict = parsed_order.model_dump()
+        parsed_order_dict["file_name"] = tmp_path.name
+        parsed_order_dict["id"] = generate_id("O")
+
+        order_create = order_schemas.OrderCreate(**parsed_order_dict)
         created_order = await crud_orders.create_order(db, order_create, user)
 
         return order_schemas.OrderResponse.model_validate(

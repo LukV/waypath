@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from core.db import models
 from core.schemas import order as order_schemas
+from core.utils.config import OrderStatus
 from core.utils.idsvc import generate_id
 
 
@@ -15,7 +16,9 @@ async def create_order(
 ) -> models.Order:
     """Create a new order in the database."""
     db_order = models.Order(
-        id=generate_id("O"),
+        id=order.id or generate_id("O"),
+        file_name=order.file_name,
+        status=order.status or OrderStatus.TO_ACCEPT,
         customer_name=order.customer_name,
         customer_address=order.customer_address,
         invoice_number=order.invoice_number,

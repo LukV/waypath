@@ -5,7 +5,9 @@ from pydantic import BaseModel, ConfigDict, Field
 from core.utils.config import OrderStatus
 
 
-class OrderLine(BaseModel):  # noqa: D101
+class OrderLine(BaseModel):
+    """Order line schema for creating and updating order lines."""
+
     product_code: str = Field(..., description="Product code or SKU")
     description: str = Field(..., description="Product description")
     quantity: int = Field(..., description="Quantity ordered")
@@ -15,7 +17,9 @@ class OrderLine(BaseModel):  # noqa: D101
     model_config = ConfigDict(from_attributes=True)
 
 
-class Order(BaseModel):  # noqa: D101
+class Order(BaseModel):
+    """Order schema for creating and updating orders."""
+
     customer_name: str = Field(..., description="Name of the customer")
     customer_address: str = Field(..., description="Address of the customer")
     invoice_number: str = Field(..., description="Order or invoice number")
@@ -30,11 +34,19 @@ class Order(BaseModel):  # noqa: D101
     model_config = ConfigDict(from_attributes=True)
 
 
-class OrderCreate(Order):  # noqa: D101
+class OrderCreate(Order):
+    """Order schema for creating new orders."""
+
+    id: str | None = None
+    file_name: str | None = Field(None, description="Filename of the source document")
+    status: OrderStatus = Field(OrderStatus.TO_ACCEPT, description="Order status")
+
     model_config = {"from_attributes": True}
 
 
-class OrderUpdate(BaseModel):  # noqa: D101
+class OrderUpdate(BaseModel):
+    """Order schema for updating existing orders."""
+
     customer_name: str | None = Field(None, description="Name of the customer")
     customer_address: str | None = Field(None, description="Address of the customer")
     invoice_number: str | None = Field(None, description="Order or invoice number")
@@ -55,19 +67,20 @@ class OrderUpdate(BaseModel):  # noqa: D101
     model_config = {"extra": "forbid"}
 
 
-class OrderResponse(Order):  # noqa: D101
+class OrderResponse(Order):
+    """Order schema for returning order details."""
+
     id: str
+    file_name: str | None
     created_at: datetime
     created_by: str  # user ID
 
 
 class OrderCounts(BaseModel):  # noqa: D101
     total: int
-    processing: int | None = 0
     to_accept: int | None = 0
     accepted: int | None = 0
     archived: int | None = 0
     deleted: int | None = 0
-    failed: int | None = 0
     rejected: int | None = 0
     needs_review: int | None = 0

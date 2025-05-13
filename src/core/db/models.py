@@ -28,6 +28,7 @@ class Order(Base):  # noqa: D101
     __tablename__ = "orders"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
+    file_name: Mapped[str] = mapped_column(String, nullable=True)
     customer_name: Mapped[str] = mapped_column(String, nullable=False)
     customer_address: Mapped[str] = mapped_column(String, nullable=False)
     invoice_number: Mapped[str] = mapped_column(String, index=True, nullable=False)
@@ -47,9 +48,7 @@ class Order(Base):  # noqa: D101
         "OrderLine", back_populates="order", cascade="all, delete-orphan"
     )
     status: Mapped[OrderStatus] = mapped_column(
-        SqlEnum(OrderStatus, name="orderstatus"),
-        nullable=False,
-        default=OrderStatus.TO_ACCEPT,
+        SqlEnum(OrderStatus, name="orderstatus"), nullable=False
     )
     user: Mapped["User"] = relationship("User", back_populates="orders")
 
