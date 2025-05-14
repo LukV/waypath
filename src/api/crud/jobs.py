@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db.models import ProcessingJob
@@ -59,9 +59,14 @@ async def get_job_by_creator_and_file(
     db: AsyncSession, created_by: str, file_name: str
 ) -> ProcessingJob | None:
     """Retrieve a processing job by creator and file name."""
-    stmt = select(ProcessingJob).where(
-        ProcessingJob.created_by == created_by,
-        ProcessingJob.file_name == file_name,
+    stmt = (
+        select(ProcessingJob)
+        .where(
+            ProcessingJob.created_by == created_by,
+            ProcessingJob.file_name == file_name,
+        )
+        .order_by(desc(ProcessingJob.created_at))
+        .limit(1)
     )
     result = await db.execute(stmt)
     return result.scalar_one_or_none()

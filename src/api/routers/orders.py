@@ -1,3 +1,4 @@
+import logging
 from enum import Enum
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -17,6 +18,7 @@ from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
 from core.utils.auth import get_current_user, is_admin_or_entity_owner
 from core.utils.database import get_db
 from core.utils.idsvc import generate_id
+from core.utils.process import process_uploaded_order
 
 
 class ParserOption(str, Enum):  # noqa: D101
@@ -30,6 +32,7 @@ class ModelOption(str, Enum):  # noqa: D101
 
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.post("/", response_model=order_schemas.OrderResponse)
@@ -154,6 +157,17 @@ async def delete_order(
 ) -> None:
     """Delete an existing order from the database. This is a hard delete."""
     await crud_orders.delete_order(db, order_id)
+
+
+@router.post("/upload", response_model=order_schemas.OrderResponse)
+async def upload_order_from_web(
+    file: Annotated[UploadFile, File(...)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[models.User, Depends(get_current_user)],
+) -> order_schemas.OrderResponse:
+    """Support authenticated frontend users uploading a document."""
+    logger.info("🌐 Received upload from %s", current_user.email)
+    return await process_uploaded_order(file=file, db=db, user=current_user)
 
 
 @router.post("/generate", response_model=order_schemas.Order)
