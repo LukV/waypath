@@ -59,7 +59,7 @@ async def process_uploaded_order(
 
     try:
         parser = PARSER_REGISTRY[DEFAULT_PARSER](tmp_path, lang)
-        extractor = EXTRACTOR_REGISTRY[DEFAULT_MODEL]()
+        extractor = EXTRACTOR_REGISTRY[(DEFAULT_MODEL, "order")]()
         object_id = generate_id("O")
         job_id = generate_id("J")
 

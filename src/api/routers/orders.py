@@ -183,8 +183,12 @@ async def generate(
 
     if parser not in PARSER_REGISTRY:
         raise HTTPException(status_code=400, detail=f"Unknown parser: {parser}")
-    if model not in EXTRACTOR_REGISTRY:
-        raise HTTPException(status_code=400, detail=f"Unknown model: {model}")
+    if (model, "order") not in EXTRACTOR_REGISTRY:
+        raise HTTPException(
+            status_code=400, detail=f"Unknown extractor for order with model: {model}"
+        )
+
+    tmp_path: Path
 
     try:
         with NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
@@ -208,14 +212,17 @@ async def generate(
             ),
         )
 
-        pipeline = DocumentPipeline(
+        pipeline = DocumentPipeline[order_schemas.Order](
             parser=parser_instance,
-            extractor=EXTRACTOR_REGISTRY[model](),
+            extractor=EXTRACTOR_REGISTRY[(model, "order")](),
             db=db,
             job_id=job_id,
         )
         return await pipeline.run()
 
     finally:
-        if tmp_path.exists():
-            tmp_path.unlink()
+        try:
+            if tmp_path.exists():
+                tmp_path.unlink()
+        except OSError as exc:
+            logger.exception("Failed to clean up temporary file: %s", exc)  # noqa: TRY401

@@ -1,30 +1,29 @@
 from dataclasses import dataclass
+from typing import Generic, TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.crud import jobs as crud_jobs
 from core.schemas.job import ProcessingJobUpdate
-from core.schemas.order import Order
-from core.services.extractors.base import AbstractOrderExtractor
+from core.services.extractors.base import AbstractExtractor
 from core.services.parsers.base import AbstractDocumentParser
 from core.utils.config import ObjectType, ProcessingStatus
 
+T = TypeVar("T")
+
 
 @dataclass
-class DocumentPipeline:
-    """Pipeline to convert a document into structured order data.
-
-    Uses a pluggable parser (PDF → Markdown) and extractor (Markdown → Order).
-    """
+class DocumentPipeline(Generic[T]):
+    """Pipeline to convert a document into structured data of type T."""
 
     parser: AbstractDocumentParser
-    extractor: AbstractOrderExtractor
+    extractor: AbstractExtractor[T]
     object_id: str | None = None
     object_type: ObjectType | None = None
     db: AsyncSession | None = None
     job_id: str | None = None
 
-    async def run(self) -> Order:
+    async def run(self) -> T:
         """Run the document processing pipeline and track job status if enabled."""
         if self.db and self.job_id:
             await crud_jobs.update_job(
@@ -39,7 +38,7 @@ class DocumentPipeline:
 
         try:
             markdown = await self.parser.parse()
-            order = await self.extractor.extract_order(markdown)
+            result = await self.extractor.extract(markdown)
 
             if self.db and self.job_id:
                 await crud_jobs.update_job(
@@ -48,7 +47,7 @@ class DocumentPipeline:
                     ProcessingJobUpdate(status=ProcessingStatus.SUCCESS),
                 )
 
-            return order  # noqa: TRY300
+            return result  # noqa: TRY300
 
         except Exception as e:
             if self.db and self.job_id:

@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 
-from core.schemas.order import Order
+T = TypeVar("T")
 
 
-class AbstractOrderExtractor(ABC):  # noqa: D101
+class AbstractExtractor(ABC, Generic[T]):
+    """Abstract base class for extractors."""
+
     @abstractmethod
-    async def extract_order(self, markdown: str) -> Order:  # noqa: D102
-        pass
+    async def extract(self, markdown: str) -> T:
+        """Extract structured data of type T from markdown."""
