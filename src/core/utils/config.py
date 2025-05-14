@@ -3,6 +3,9 @@ from enum import Enum
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+DEFAULT_PARSER = "llamaparse"
+DEFAULT_MODEL = "openai"
+
 
 class OrderStatus(str, Enum):  # noqa: D101
     TO_ACCEPT = "to_accept"
@@ -18,6 +21,7 @@ class ProcessingStatus(str, Enum):  # noqa: D101
     PROCESSING = "processing"
     SUCCESS = "success"
     FAILED = "failed"
+
 
 class ObjectType(str, Enum):  # noqa: D101
     ORDER = "order"
