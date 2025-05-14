@@ -1,7 +1,10 @@
-## v0.25.0 (2025-05-12)
+## v0.26.0 (2025-05-14)
 
 ### Feat
 
+- **routers/job.py**: add get_job_by_user_and_file endpoint
+- split status in order status and processing status
+- add filename to order object
 - support doc upload from web site
 - search orders by name, address and invoice number
 - add order stats
