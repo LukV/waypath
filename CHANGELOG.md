@@ -1,4 +1,4 @@
-## v0.26.0 (2025-05-14)
+## v0.27.0 (2025-05-14)
 
 ### Feat
 
@@ -39,6 +39,7 @@
 
 ### Refactor
 
+- move /upload to orders in prep of support invoices
 - **factories.py**: create parser and extractor factories to support any doc parser and model
 - refactor order processing logic to service orchestrator pattern
 
