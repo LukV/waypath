@@ -53,3 +53,15 @@ async def get_job_by_object_id(
     stmt = select(ProcessingJob).where(ProcessingJob.object_id == object_id)
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
+
+
+async def get_job_by_creator_and_file(
+    db: AsyncSession, created_by: str, file_name: str
+) -> ProcessingJob | None:
+    """Retrieve a processing job by creator and file name."""
+    stmt = select(ProcessingJob).where(
+        ProcessingJob.created_by == created_by,
+        ProcessingJob.file_name == file_name,
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
