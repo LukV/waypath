@@ -6,9 +6,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.crud import jobs as crud_jobs
 from api.crud import orders as crud_orders
 from core.db import models
 from core.logic.pipeline import DocumentPipeline
+from core.schemas import job as job_schemas
 from core.schemas import order as order_schemas
 from core.schemas.common import PaginatedResponse
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
@@ -157,6 +159,8 @@ async def delete_order(
 @router.post("/generate", response_model=order_schemas.Order)
 async def generate(
     file: Annotated[UploadFile, File(...)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[models.User, Depends(get_current_user)],
     parser: ParserOption = ParserOption.llamaparse,
     model: ModelOption = ModelOption.openai,
 ) -> order_schemas.Order:
@@ -179,9 +183,22 @@ async def generate(
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
 
+        job_id = generate_id("J")
+
+        await crud_jobs.create_job(
+            db,
+            job_schemas.ProcessingJobCreate(
+                id=job_id,
+                file_name=tmp_path.name,
+                created_by=current_user.id,
+            ),
+        )
+
         pipeline = DocumentPipeline(
             parser=parser_instance,
             extractor=EXTRACTOR_REGISTRY[model](),
+            db=db,
+            job_id=job_id,
         )
         return await pipeline.run()
 

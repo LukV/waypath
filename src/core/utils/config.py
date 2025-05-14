@@ -13,6 +13,19 @@ class OrderStatus(str, Enum):  # noqa: D101
     NEEDS_REVIEW = "needs_review"
 
 
+class ProcessingStatus(str, Enum):  # noqa: D101
+    PENDING = "pending"
+    PROCESSING = "processing"
+    SUCCESS = "success"
+    FAILED = "failed"
+
+class ObjectType(str, Enum):  # noqa: D101
+    ORDER = "order"
+    INVOICE = "invoice"
+    TENDER = "tender"
+    TIMESHEET = "timesheet"
+
+
 def setup_cors(app: FastAPI) -> None:
     """Set up CORS middleware for the FastAPI application."""
     app.add_middleware(

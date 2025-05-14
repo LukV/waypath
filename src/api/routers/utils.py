@@ -20,13 +20,16 @@ from fastapi import (
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.datastructures import UploadFile as StarletteUploadFile
 
+from api.crud import jobs as crud_jobs
 from api.crud import orders as crud_orders
 from api.crud import users as crud_users
 from core.db import models
 from core.logic.pipeline import DocumentPipeline
+from core.schemas import job as job_schemas
 from core.schemas import order as order_schemas
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
 from core.utils.auth import get_current_user
+from core.utils.config import ObjectType
 from core.utils.database import get_db
 from core.utils.idsvc import generate_id
 
@@ -174,12 +177,31 @@ async def process_uploaded_order(
     try:
         parser = PARSER_REGISTRY[DEFAULT_PARSER](tmp_path, lang)
         extractor = EXTRACTOR_REGISTRY[DEFAULT_MODEL]()
-        pipeline = DocumentPipeline(parser=parser, extractor=extractor)
+        object_id = generate_id("O")
+        job_id = generate_id("J")
+
+        await crud_jobs.create_job(
+            db,
+            job_schemas.ProcessingJobCreate(
+                id=job_id,
+                file_name=tmp_path.name,
+                created_by=user.id,
+            ),
+        )
+
+        pipeline = DocumentPipeline(
+            parser=parser,
+            extractor=extractor,
+            object_id=object_id,
+            object_type=ObjectType.ORDER,
+            db=db,
+            job_id=job_id,
+        )
         parsed_order = await pipeline.run()
 
         parsed_order_dict = parsed_order.model_dump()
         parsed_order_dict["file_name"] = tmp_path.name
-        parsed_order_dict["id"] = generate_id("O")
+        parsed_order_dict["id"] = object_id
 
         order_create = order_schemas.OrderCreate(**parsed_order_dict)
         created_order = await crud_orders.create_order(db, order_create, user)
