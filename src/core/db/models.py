@@ -3,11 +3,13 @@ from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from core.utils.config import OrderStatus
+from core.utils.config import ObjectType, OrderStatus, ProcessingStatus
 from core.utils.database import Base
 
 
-class User(Base):  # noqa: D101
+class User(Base):
+    """User model for storing user information."""
+
     __tablename__ = "users"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
@@ -24,10 +26,13 @@ class User(Base):  # noqa: D101
     orders: Mapped[list["Order"]] = relationship("Order", back_populates="user")
 
 
-class Order(Base):  # noqa: D101
+class Order(Base):
+    """Order model for storing order details."""
+
     __tablename__ = "orders"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
+    file_name: Mapped[str] = mapped_column(String, nullable=True)
     customer_name: Mapped[str] = mapped_column(String, nullable=False)
     customer_address: Mapped[str] = mapped_column(String, nullable=False)
     invoice_number: Mapped[str] = mapped_column(String, index=True, nullable=False)
@@ -47,14 +52,14 @@ class Order(Base):  # noqa: D101
         "OrderLine", back_populates="order", cascade="all, delete-orphan"
     )
     status: Mapped[OrderStatus] = mapped_column(
-        SqlEnum(OrderStatus, name="orderstatus"),
-        nullable=False,
-        default=OrderStatus.TO_ACCEPT,
+        SqlEnum(OrderStatus, name="orderstatus"), nullable=False
     )
     user: Mapped["User"] = relationship("User", back_populates="orders")
 
 
-class OrderLine(Base):  # noqa: D101
+class OrderLine(Base):
+    """Order line model for storing line items in an order."""
+
     __tablename__ = "order_lines"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -69,3 +74,28 @@ class OrderLine(Base):  # noqa: D101
     subtotal: Mapped[float] = mapped_column(nullable=False)
 
     order: Mapped["Order"] = relationship("Order", back_populates="lines")
+
+
+class ProcessingJob(Base):
+    """Processing job model for tracking file processing status."""
+
+    __tablename__ = "processing_jobs"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    object_id: Mapped[str] = mapped_column(String, nullable=True, index=True)
+    object_type: Mapped[str] = mapped_column(
+        SqlEnum(ObjectType, name="objecttype"), nullable=True
+    )
+    status: Mapped[str] = mapped_column(
+        SqlEnum(ProcessingStatus, name="processingstatus"),
+        nullable=True,
+        default=ProcessingStatus.PENDING,
+    )
+    file_name: Mapped[str] = mapped_column(String, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(String, nullable=True)
+    created_by: Mapped[str] = mapped_column(
+        String, ForeignKey("users.id"), nullable=False
+    )
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )

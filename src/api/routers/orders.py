@@ -6,14 +6,17 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.crud import jobs as crud_jobs
 from api.crud import orders as crud_orders
 from core.db import models
 from core.logic.pipeline import DocumentPipeline
+from core.schemas import job as job_schemas
 from core.schemas import order as order_schemas
 from core.schemas.common import PaginatedResponse
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
 from core.utils.auth import get_current_user, is_admin_or_entity_owner
 from core.utils.database import get_db
+from core.utils.idsvc import generate_id
 
 
 class ParserOption(str, Enum):  # noqa: D101
@@ -36,6 +39,8 @@ async def create_order(
     current_user: Annotated[models.User, Depends(get_current_user)],
 ) -> order_schemas.OrderResponse:
     """Create a new order in the database."""
+    order_id = generate_id("O")
+    order = order_schemas.OrderCreate(id=order_id, **order.model_dump(exclude={"id"}))
     created_order = await crud_orders.create_order(db, order, current_user)
     return order_schemas.OrderResponse.model_validate(
         created_order, from_attributes=True
@@ -154,6 +159,8 @@ async def delete_order(
 @router.post("/generate", response_model=order_schemas.Order)
 async def generate(
     file: Annotated[UploadFile, File(...)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[models.User, Depends(get_current_user)],
     parser: ParserOption = ParserOption.llamaparse,
     model: ModelOption = ModelOption.openai,
 ) -> order_schemas.Order:
@@ -176,9 +183,22 @@ async def generate(
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
 
+        job_id = generate_id("J")
+
+        await crud_jobs.create_job(
+            db,
+            job_schemas.ProcessingJobCreate(
+                id=job_id,
+                file_name=tmp_path.name,
+                created_by=current_user.id,
+            ),
+        )
+
         pipeline = DocumentPipeline(
             parser=parser_instance,
             extractor=EXTRACTOR_REGISTRY[model](),
+            db=db,
+            job_id=job_id,
         )
         return await pipeline.run()
 

@@ -5,14 +5,25 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 class OrderStatus(str, Enum):  # noqa: D101
-    PROCESSING = "processing"
     TO_ACCEPT = "to_accept"
     ACCEPTED = "accepted"
     ARCHIVED = "archived"
     DELETED = "deleted"
-    FAILED = "failed"
     REJECTED = "rejected"
     NEEDS_REVIEW = "needs_review"
+
+
+class ProcessingStatus(str, Enum):  # noqa: D101
+    PENDING = "pending"
+    PROCESSING = "processing"
+    SUCCESS = "success"
+    FAILED = "failed"
+
+class ObjectType(str, Enum):  # noqa: D101
+    ORDER = "order"
+    INVOICE = "invoice"
+    TENDER = "tender"
+    TIMESHEET = "timesheet"
 
 
 def setup_cors(app: FastAPI) -> None:
