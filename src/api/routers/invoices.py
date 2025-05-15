@@ -4,7 +4,17 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+import anyio
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.crud import invoices as crud_invoices
@@ -16,9 +26,10 @@ from core.schemas import job as job_schemas
 from core.schemas.common import PaginatedResponse
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
 from core.utils.auth import get_current_user, is_admin_or_entity_owner
+from core.utils.background import run_document_pipeline_background
 from core.utils.database import get_db
 from core.utils.idsvc import generate_id
-from core.utils.process import process_uploaded_invoice
+from core.utils.process import sanitize_filename
 
 
 class ParserOption(str, Enum):  # noqa: D101
@@ -162,15 +173,44 @@ async def delete_invoice(
     await crud_invoices.delete_invoice(db, invoice_id)
 
 
-@router.post("/upload", response_model=invoice_schemas.InvoiceResponse)
-async def upload_invoice_from_web(
+@router.post("/upload")
+async def upload_order_from_web(
     file: Annotated[UploadFile, File(...)],
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[models.User, Depends(get_current_user)],
-) -> invoice_schemas.InvoiceResponse:
-    """Support authenticated frontend users uploading a document."""
-    logger.info("🌐 Received upload from %s", current_user.email)
-    return await process_uploaded_invoice(file=file, db=db, user=current_user)
+    background_tasks: BackgroundTasks,
+) -> job_schemas.JobQueuedResponse:
+    """Support authenticated frontend users uploading a document asynchronously."""
+    logger.info("🌐 Upload received from %s", current_user.email)
+
+    filename = sanitize_filename(file.filename or "upload.pdf")
+    tmp_path = Path(f"/tmp/{filename}")  # noqa: S108
+
+    async with await anyio.open_file(tmp_path, "wb") as f:
+        content = await file.read()
+        await f.write(content)
+
+    job_id = generate_id("J")
+
+    await crud_jobs.create_job(
+        db,
+        job_schemas.ProcessingJobCreate(
+            id=job_id,
+            file_name=tmp_path.name,
+            created_by=current_user.id,
+        ),
+    )
+
+    background_tasks.add_task(
+        run_document_pipeline_background,
+        db=db,
+        user=current_user,
+        file_path=str(tmp_path),
+        entity="invoice",
+        job_id=job_id,
+    )
+
+    return job_schemas.JobQueuedResponse(job_id=job_id)
 
 
 @router.post("/generate", response_model=invoice_schemas.Invoice)

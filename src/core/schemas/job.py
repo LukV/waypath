@@ -38,3 +38,10 @@ class ProcessingJobResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class JobQueuedResponse(BaseModel):
+    """Schema for returning job queued response."""
+
+    job_id: str
+    status: ProcessingStatus = ProcessingStatus.PROCESSING

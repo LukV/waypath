@@ -10,12 +10,10 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.crud import invoices as crud_invoices
-from api.crud import jobs as crud_jobs
 from api.crud import orders as crud_orders
 from core.db import models
 from core.logic.pipeline import DocumentPipeline
 from core.schemas import invoice as invoice_schemas
-from core.schemas import job as job_schemas
 from core.schemas import order as order_schemas
 from core.services.extractors.base import AbstractExtractor
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
@@ -54,6 +52,7 @@ async def process_uploaded_document(  # noqa: PLR0913
     create_fn: Callable[[AsyncSession, TCreate, models.User], Awaitable[Base]],
     schema_create: type[TCreate],
     schema_response: type[TResponse],
+    job_id: str,
     file: UploadFile | None = None,
     file_path: Path | None = None,
     lang: str = "en",
@@ -77,16 +76,6 @@ async def process_uploaded_document(  # noqa: PLR0913
 
     try:
         object_id = generate_id(prefix)
-        job_id = generate_id("J")
-
-        await crud_jobs.create_job(
-            db,
-            job_schemas.ProcessingJobCreate(
-                id=job_id,
-                file_name=tmp_path.name,
-                created_by=user.id,
-            ),
-        )
 
         pipeline = DocumentPipeline[TSchema](
             parser=PARSER_REGISTRY[DEFAULT_PARSER](tmp_path, lang),
@@ -108,15 +97,16 @@ async def process_uploaded_document(  # noqa: PLR0913
             tmp_path.unlink(missing_ok=True)
 
 
-async def process_uploaded_order(
+async def process_uploaded_order(  # noqa: PLR0913
     db: AsyncSession,
     user: models.User,
+    job_id: str,
     file: UploadFile | None = None,
     file_path: Path | None = None,
     lang: str = "en",
 ) -> order_schemas.OrderResponse:
     """Process an uploaded order document."""
-    if file is None:
+    if file_path is None:
         raise ValueError("file_path cannot be None")  # noqa: TRY003
     extractor = EXTRACTOR_REGISTRY[(DEFAULT_MODEL, "order")]()
     return await process_uploaded_document(
@@ -131,18 +121,20 @@ async def process_uploaded_order(
         file_path=file_path,
         lang=lang,
         prefix="O",
+        job_id=job_id,
     )
 
 
-async def process_uploaded_invoice(
+async def process_uploaded_invoice(  # noqa: PLR0913
     db: AsyncSession,
     user: models.User,
+    job_id: str,
     file: UploadFile | None = None,
     file_path: Path | None = None,
     lang: str = "en",
 ) -> invoice_schemas.InvoiceResponse:
     """Process an uploaded invoice document."""
-    if file is None:
+    if file_path is None:
         raise ValueError("file_path cannot be None")  # noqa: TRY003
     extractor = EXTRACTOR_REGISTRY[(DEFAULT_MODEL, "invoice")]()
     return await process_uploaded_document(
@@ -157,4 +149,5 @@ async def process_uploaded_invoice(
         file_path=file_path,
         lang=lang,
         prefix="I",
+        job_id=job_id,
     )

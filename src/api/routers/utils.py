@@ -17,9 +17,12 @@ from fastapi import (
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.datastructures import UploadFile as StarletteUploadFile
 
+from api.crud import jobs as crud_jobs
 from api.crud import users as crud_users
+from core.schemas import job as job_schemas
 from core.schemas import order as order_schemas
 from core.utils.database import get_db
+from core.utils.idsvc import generate_id
 from core.utils.process import (
     is_dangerous_file,
     process_uploaded_order,
@@ -107,8 +110,18 @@ async def receive(  # noqa: PLR0913
             logger.info(f"📎 Saved attachment: {file_path}")
 
             try:
+                job_id = generate_id("J")
+
+                await crud_jobs.create_job(
+                    db,
+                    job_schemas.ProcessingJobCreate(
+                        id=job_id,
+                        file_name=filename,
+                        created_by=user.id,
+                    ),
+                )
                 order = await process_uploaded_order(
-                    db=db, user=user, file_path=file_path
+                    db=db, user=user, job_id=job_id, file_path=file_path
                 )
                 results.append(order)
             finally:
