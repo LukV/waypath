@@ -7,7 +7,7 @@ DEFAULT_PARSER = "llamaparse"
 DEFAULT_MODEL = "openai"
 
 
-class OrderStatus(str, Enum):  # noqa: D101
+class ObjectStatus(str, Enum):  # noqa: D101
     TO_ACCEPT = "to_accept"
     ACCEPTED = "accepted"
     ARCHIVED = "archived"

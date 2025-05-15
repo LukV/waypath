@@ -8,7 +8,7 @@ from core.utils.config import setup_cors
 from core.utils.database import Base, engine
 from core.utils.logging import configure_logging
 
-from .routers import auth, jobs, orders, users, utils
+from .routers import auth, invoices, jobs, orders, users, utils
 
 # Load environment variables
 load_dotenv()
@@ -41,5 +41,6 @@ setup_cors(app)
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(orders.router, prefix="/orders", tags=["Orders"])
+app.include_router(invoices.router, prefix="/invoices", tags=["Invoices"])
 app.include_router(utils.router, prefix="/utils", tags=["Utils"])
 app.include_router(jobs.router, prefix="/jobs", tags=["Jobs"])

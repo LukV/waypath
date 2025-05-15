@@ -1,47 +1,65 @@
 import logging
 import re
+from collections.abc import Awaitable, Callable
 from pathlib import Path
+from typing import TypeVar
 
 import anyio
-from fastapi import (
-    HTTPException,
-    UploadFile,
-)
+from fastapi import HTTPException, UploadFile
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.crud import invoices as crud_invoices
 from api.crud import jobs as crud_jobs
 from api.crud import orders as crud_orders
 from core.db import models
 from core.logic.pipeline import DocumentPipeline
+from core.schemas import invoice as invoice_schemas
 from core.schemas import job as job_schemas
 from core.schemas import order as order_schemas
+from core.services.extractors.base import AbstractExtractor
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
 from core.utils.config import DEFAULT_MODEL, DEFAULT_PARSER, ObjectType
+from core.utils.database import Base
 from core.utils.idsvc import generate_id
 
 logger = logging.getLogger(__name__)
 
+T = TypeVar("T")
+
+TCreate = TypeVar("TCreate", bound=BaseModel)
+TResponse = TypeVar("TResponse", bound=BaseModel)
+TSchema = TypeVar("TSchema", bound=BaseModel)
+TOrm = TypeVar("TOrm", bound=Base)
+
 
 def sanitize_filename(filename: str) -> str:
-    """Sanitize filename to prevent path traversal or injection."""
+    """Sanitize the filename to remove any dangerous characters."""
     filename = filename.strip().replace("\\", "_").replace("/", "_")
     return re.sub(r"[^a-zA-Z0-9._-]", "_", filename)
 
 
 def is_dangerous_file(filename: str) -> bool:
-    """Block executable or suspicious file extensions."""
+    """Check if the file has a dangerous extension."""
     forbidden_extensions = {".exe", ".bat", ".cmd", ".sh", ".js", ".php", ".py"}
     return Path(filename).suffix.lower() in forbidden_extensions
 
 
-async def process_uploaded_order(
+async def process_uploaded_document(  # noqa: PLR0913
+    *,
     db: AsyncSession,
     user: models.User,
+    object_type: ObjectType,
+    extractor: AbstractExtractor[TSchema],
+    create_fn: Callable[[AsyncSession, TCreate, models.User], Awaitable[Base]],
+    schema_create: type[TCreate],
+    schema_response: type[TResponse],
     file: UploadFile | None = None,
     file_path: Path | None = None,
     lang: str = "en",
-) -> order_schemas.OrderResponse:
-    """Shared logic to process uploaded file and store resulting Order."""
+    prefix: str = "D",
+) -> TResponse:
+    """Process an uploaded document and create in the database."""
     if file is not None:
         if is_dangerous_file(file.filename or "unknown"):
             logger.warning(f"⛔ Rejected dangerous file: {file.filename}")
@@ -58,9 +76,7 @@ async def process_uploaded_order(
         raise ValueError("Provide file or file_path")  # noqa: TRY003
 
     try:
-        parser = PARSER_REGISTRY[DEFAULT_PARSER](tmp_path, lang)
-        extractor = EXTRACTOR_REGISTRY[(DEFAULT_MODEL, "order")]()
-        object_id = generate_id("O")
+        object_id = generate_id(prefix)
         job_id = generate_id("J")
 
         await crud_jobs.create_job(
@@ -72,26 +88,73 @@ async def process_uploaded_order(
             ),
         )
 
-        pipeline = DocumentPipeline(
-            parser=parser,
+        pipeline = DocumentPipeline[TSchema](
+            parser=PARSER_REGISTRY[DEFAULT_PARSER](tmp_path, lang),
             extractor=extractor,
             object_id=object_id,
-            object_type=ObjectType.ORDER,
+            object_type=object_type,
             db=db,
             job_id=job_id,
         )
-        parsed_order = await pipeline.run()
+        parsed_entity: TSchema = await pipeline.run()
+        parsed_dict = parsed_entity.model_dump()
+        parsed_dict["file_name"] = tmp_path.name
+        parsed_dict["id"] = object_id
 
-        parsed_order_dict = parsed_order.model_dump()
-        parsed_order_dict["file_name"] = tmp_path.name
-        parsed_order_dict["id"] = object_id
-
-        order_create = order_schemas.OrderCreate(**parsed_order_dict)
-        created_order = await crud_orders.create_order(db, order_create, user)
-
-        return order_schemas.OrderResponse.model_validate(
-            created_order, from_attributes=True
-        )
+        created = await create_fn(db, schema_create(**parsed_dict), user)
+        return schema_response.model_validate(created, from_attributes=True)
     finally:
         if delete_after:
             tmp_path.unlink(missing_ok=True)
+
+
+async def process_uploaded_order(
+    db: AsyncSession,
+    user: models.User,
+    file: UploadFile | None = None,
+    file_path: Path | None = None,
+    lang: str = "en",
+) -> order_schemas.OrderResponse:
+    """Process an uploaded order document."""
+    if file is None:
+        raise ValueError("file_path cannot be None")  # noqa: TRY003
+    extractor = EXTRACTOR_REGISTRY[(DEFAULT_MODEL, "order")]()
+    return await process_uploaded_document(
+        db=db,
+        user=user,
+        object_type=ObjectType.ORDER,
+        extractor=extractor,
+        create_fn=crud_orders.create_order,
+        schema_create=order_schemas.OrderCreate,
+        schema_response=order_schemas.OrderResponse,
+        file=file,
+        file_path=file_path,
+        lang=lang,
+        prefix="O",
+    )
+
+
+async def process_uploaded_invoice(
+    db: AsyncSession,
+    user: models.User,
+    file: UploadFile | None = None,
+    file_path: Path | None = None,
+    lang: str = "en",
+) -> invoice_schemas.InvoiceResponse:
+    """Process an uploaded invoice document."""
+    if file is None:
+        raise ValueError("file_path cannot be None")  # noqa: TRY003
+    extractor = EXTRACTOR_REGISTRY[(DEFAULT_MODEL, "invoice")]()
+    return await process_uploaded_document(
+        db=db,
+        user=user,
+        object_type=ObjectType.INVOICE,
+        extractor=extractor,
+        create_fn=crud_invoices.create_invoice,
+        schema_create=invoice_schemas.InvoiceCreate,
+        schema_response=invoice_schemas.InvoiceResponse,
+        file=file,
+        file_path=file_path,
+        lang=lang,
+        prefix="I",
+    )

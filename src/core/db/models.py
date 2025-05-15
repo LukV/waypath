@@ -3,7 +3,7 @@ from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from core.utils.config import ObjectType, OrderStatus, ProcessingStatus
+from core.utils.config import ObjectStatus, ObjectType, ProcessingStatus
 from core.utils.database import Base
 
 
@@ -24,6 +24,7 @@ class User(Base):
     )
 
     orders: Mapped[list["Order"]] = relationship("Order", back_populates="user")
+    invoices: Mapped[list["Invoice"]] = relationship("Invoice", back_populates="user")
 
 
 class Order(Base):
@@ -51,8 +52,8 @@ class Order(Base):
     lines: Mapped[list["OrderLine"]] = relationship(
         "OrderLine", back_populates="order", cascade="all, delete-orphan"
     )
-    status: Mapped[OrderStatus] = mapped_column(
-        SqlEnum(OrderStatus, name="orderstatus"), nullable=False
+    status: Mapped[ObjectStatus] = mapped_column(
+        SqlEnum(ObjectStatus, name="objectstatus"), nullable=False
     )
     user: Mapped["User"] = relationship("User", back_populates="orders")
 
@@ -74,6 +75,56 @@ class OrderLine(Base):
     subtotal: Mapped[float] = mapped_column(nullable=False)
 
     order: Mapped["Order"] = relationship("Order", back_populates="lines")
+
+
+class Invoice(Base):
+    """Invoice model for storing invoice details."""
+
+    __tablename__ = "invoices"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
+    file_name: Mapped[str] = mapped_column(String, nullable=True)
+    supplier_name: Mapped[str] = mapped_column(String, nullable=False)
+    supplier_address: Mapped[str] = mapped_column(String, nullable=False)
+    supplier_vat_number: Mapped[str] = mapped_column(String, nullable=False)
+    invoice_number: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    invoice_date: Mapped[str] = mapped_column(String, nullable=False)
+    due_date: Mapped[str] = mapped_column(String, nullable=False)
+    total_excl_vat: Mapped[float] = mapped_column(Float, nullable=False)
+    vat: Mapped[float] = mapped_column(Float, nullable=False)
+    total_incl_vat: Mapped[float] = mapped_column(Float, nullable=False)
+    created_by: Mapped[str] = mapped_column(
+        String, ForeignKey("users.id"), nullable=False
+    )
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    lines: Mapped[list["InvoiceLine"]] = relationship(
+        "InvoiceLine", back_populates="invoice", cascade="all, delete-orphan"
+    )
+    status: Mapped[ObjectStatus] = mapped_column(
+        SqlEnum(ObjectStatus, name="objectstatus"), nullable=False
+    )
+    user: Mapped["User"] = relationship("User", back_populates="invoices")
+
+
+class InvoiceLine(Base):
+    """Invoice line model for storing line items in an invoice."""
+
+    __tablename__ = "invoice_lines"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    invoice_id: Mapped[str] = mapped_column(
+        String, ForeignKey("invoices.id", ondelete="CASCADE"), nullable=False
+    )
+
+    description: Mapped[str] = mapped_column(String, nullable=False)
+    quantity: Mapped[int] = mapped_column(nullable=False)
+    unit_price: Mapped[float] = mapped_column(nullable=False)
+    subtotal: Mapped[float] = mapped_column(nullable=False)
+
+    invoice: Mapped["Invoice"] = relationship("Invoice", back_populates="lines")
 
 
 class ProcessingJob(Base):
