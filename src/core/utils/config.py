@@ -7,7 +7,7 @@ DEFAULT_PARSER = "llamaparse"
 DEFAULT_MODEL = "openai"
 
 
-class OrderStatus(str, Enum):  # noqa: D101
+class ObjectStatus(str, Enum):  # noqa: D101
     TO_ACCEPT = "to_accept"
     ACCEPTED = "accepted"
     ARCHIVED = "archived"
@@ -21,13 +21,6 @@ class ProcessingStatus(str, Enum):  # noqa: D101
     PROCESSING = "processing"
     SUCCESS = "success"
     FAILED = "failed"
-
-
-class ObjectType(str, Enum):  # noqa: D101
-    ORDER = "order"
-    INVOICE = "invoice"
-    TENDER = "tender"
-    TIMESHEET = "timesheet"
 
 
 def setup_cors(app: FastAPI) -> None:

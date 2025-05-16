@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from core.utils.config import OrderStatus
+from core.utils.config import ObjectStatus
 
 
 class OrderLine(BaseModel):
@@ -28,7 +28,7 @@ class Order(BaseModel):
     total_excl_vat: float = Field(..., description="Total amount excluding VAT in EUR")
     vat: float = Field(..., description="VAT amount in EUR")
     total_incl_vat: float = Field(..., description="Total amount including VAT in EUR")
-    status: OrderStatus = Field(..., description="Order processing status")
+    status: ObjectStatus = Field(..., description="Order processing status")
     lines: list[OrderLine] = Field(..., description="Line items in the order")
 
     model_config = ConfigDict(from_attributes=True)
@@ -39,7 +39,7 @@ class OrderCreate(Order):
 
     id: str | None = None
     file_name: str | None = Field(None, description="Filename of the source document")
-    status: OrderStatus = Field(OrderStatus.TO_ACCEPT, description="Order status")
+    status: ObjectStatus = Field(ObjectStatus.TO_ACCEPT, description="Order status")
 
     model_config = {"from_attributes": True}
 
@@ -61,7 +61,7 @@ class OrderUpdate(BaseModel):
     total_incl_vat: float | None = Field(
         None, description="Total amount including VAT in EUR"
     )
-    status: OrderStatus | None = Field(None, description="Order processing status")
+    status: ObjectStatus | None = Field(None, description="Order processing status")
     lines: list[OrderLine] | None = Field(None, description="Line items in the order")
 
     model_config = {"extra": "forbid"}

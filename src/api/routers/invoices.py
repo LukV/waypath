@@ -15,12 +15,12 @@ from fastapi import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.crud import invoices as crud_invoices
 from api.crud import jobs as crud_jobs
-from api.crud import orders as crud_orders
 from core.db import models
 from core.logic.pipeline import DocumentPipeline
+from core.schemas import invoice as invoice_schemas
 from core.schemas import job as job_schemas
-from core.schemas import order as order_schemas
 from core.schemas.classifier import DocumentType
 from core.schemas.common import PaginatedResponse
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
@@ -43,23 +43,25 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.post("/", response_model=order_schemas.OrderResponse)
-async def create_order(
-    order: order_schemas.OrderCreate,
+@router.post("/", response_model=invoice_schemas.InvoiceResponse)
+async def create_invoice(
+    invoice: invoice_schemas.InvoiceCreate,
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[models.User, Depends(get_current_user)],
-) -> order_schemas.OrderResponse:
-    """Create a new order in the database."""
-    order_id = generate_id("O")
-    order = order_schemas.OrderCreate(id=order_id, **order.model_dump(exclude={"id"}))
-    created_order = await crud_orders.create_order(db, order, current_user)
-    return order_schemas.OrderResponse.model_validate(
-        created_order, from_attributes=True
+) -> invoice_schemas.InvoiceResponse:
+    """Create a new invoice in the database."""
+    invoice_id = generate_id("I")
+    invoice = invoice_schemas.InvoiceCreate(
+        id=invoice_id, **invoice.model_dump(exclude={"id"})
+    )
+    created_invoice = await crud_invoices.create_invoice(db, invoice, current_user)
+    return invoice_schemas.InvoiceResponse.model_validate(
+        created_invoice, from_attributes=True
     )
 
 
 @router.get("/")
-async def get_all_orders(  # noqa: PLR0913
+async def get_all_invoices(  # noqa: PLR0913
     current_user: Annotated[models.User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
     page: Annotated[int, Query(ge=1, description="Page number (1-based index)")] = 1,
@@ -76,12 +78,13 @@ async def get_all_orders(  # noqa: PLR0913
     query: Annotated[
         str | None,
         Query(
-            description="Free text search in customer name, address, or invoice number"
+            description="Free text search in supplier name, address, vat nr \
+                or invoice number"
         ),
     ] = None,
-) -> PaginatedResponse[order_schemas.OrderResponse]:
+) -> PaginatedResponse[invoice_schemas.InvoiceResponse]:
     """Retrieve a list of all users in the database."""
-    orders = await crud_orders.get_all_orders(
+    invoices = await crud_invoices.get_all_invoices(
         db,
         current_user,
         page=page,
@@ -92,97 +95,97 @@ async def get_all_orders(  # noqa: PLR0913
     )
 
     return PaginatedResponse(
-        total_pages=orders["total_pages"],
-        total_items=orders["total_items"],
-        current_page=orders["current_page"],
+        total_pages=invoices["total_pages"],
+        total_items=invoices["total_items"],
+        current_page=invoices["current_page"],
         items=[
-            order_schemas.OrderResponse.model_validate(order)
-            for order in orders["items"]
+            invoice_schemas.InvoiceResponse.model_validate(invoice)
+            for invoice in invoices["items"]
         ],
     )
 
 
-@router.get("/stats", response_model=order_schemas.OrderCounts)
-async def get_order_stats(
+@router.get("/stats", response_model=invoice_schemas.InvoiceCounts)
+async def get_invoice_stats(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[models.User, Depends(get_current_user)],
-) -> order_schemas.OrderCounts:
-    """Get total number of orders and counts per status."""
-    counts = await crud_orders.get_order_counts(db, current_user)
-    return order_schemas.OrderCounts(**counts)
+) -> invoice_schemas.InvoiceCounts:
+    """Get total number of invoices and counts per status."""
+    counts = await crud_invoices.get_invoice_counts(db, current_user)
+    return invoice_schemas.InvoiceCounts(**counts)
 
 
-@router.get("/{order_id}", response_model=order_schemas.OrderResponse)
-async def get_order(
-    order_id: str,
+@router.get("/{invoice_id}", response_model=invoice_schemas.InvoiceResponse)
+async def get_invoice(
+    invoice_id: str,
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> order_schemas.OrderResponse:
-    """Retrieve an order's details."""
-    order = await crud_orders.get_order_by_id(db, order_id)
-    if not order:
-        raise HTTPException(status_code=404, detail="order not found")
+) -> invoice_schemas.InvoiceResponse:
+    """Retrieve an invoice's details."""
+    invoice = await crud_invoices.get_invoice_by_id(db, invoice_id)
+    if not invoice:
+        raise HTTPException(status_code=404, detail="invoice not found")
 
-    return order_schemas.OrderResponse.model_validate(order)
+    return invoice_schemas.InvoiceResponse.model_validate(invoice)
 
 
-@router.put("/{order_id}", response_model=order_schemas.OrderResponse)
-async def update_order(
-    order_id: str,
-    order_update: order_schemas.OrderUpdate,
+@router.put("/{invoice_id}", response_model=invoice_schemas.InvoiceResponse)
+async def update_invoice(
+    invoice_id: str,
+    invoice_update: invoice_schemas.InvoiceUpdate,
     db: Annotated[AsyncSession, Depends(get_db)],
     _current_user: Annotated[
         models.User,
         Depends(
             is_admin_or_entity_owner(
-                crud_orders.get_order_by_id,
-                entity_name="Order",
-                entity_id_param="order_id",
+                crud_invoices.get_invoice_by_id,
+                entity_name="Invoice",
+                entity_id_param="invoice_id",
             )
         ),
     ],
-) -> order_schemas.OrderResponse:
-    """Update an existing order's details."""
-    updated_order = await crud_orders.update_order(db, order_id, order_update)
-    return order_schemas.OrderResponse.model_validate(
-        updated_order, from_attributes=True
+) -> invoice_schemas.InvoiceResponse:
+    """Update an existing invoice's details."""
+    updated_invoice = await crud_invoices.update_invoice(db, invoice_id, invoice_update)
+    return invoice_schemas.InvoiceResponse.model_validate(
+        updated_invoice, from_attributes=True
     )
 
 
-@router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_order(
-    order_id: str,
+@router.delete("/{invoice_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_invoice(
+    invoice_id: str,
     db: Annotated[AsyncSession, Depends(get_db)],
     _current_user: Annotated[
         models.User,
         Depends(
             is_admin_or_entity_owner(
-                crud_orders.get_order_by_id,
-                entity_name="Order",
-                entity_id_param="order_id",
+                crud_invoices.get_invoice_by_id,
+                entity_name="Invoice",
+                entity_id_param="invoice_id",
             )
         ),
     ],
 ) -> None:
-    """Delete an existing order from the database. This is a hard delete."""
-    await crud_orders.delete_order(db, order_id)
+    """Delete an existing invoice from the database. This is a hard delete."""
+    await crud_invoices.delete_invoice(db, invoice_id)
 
 
-@router.post("/generate", response_model=order_schemas.Order)
+@router.post("/generate", response_model=invoice_schemas.Invoice)
 async def generate(
     file: Annotated[UploadFile, File(...)],
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[models.User, Depends(get_current_user)],
     parser: ParserOption = ParserOption.llamaparse,
     model: ModelOption = ModelOption.openai,
-) -> order_schemas.Order:
-    """Receive a document and return structured Order data."""
+) -> invoice_schemas.Invoice:
+    """Receive a document and return structured Invoice data."""
     suffix = Path(file.filename or "").suffix.lower()
 
     if parser not in PARSER_REGISTRY:
         raise HTTPException(status_code=400, detail=f"Unknown parser: {parser}")
-    if (model, "order") not in EXTRACTOR_REGISTRY:
+    if (model, "invoice") not in EXTRACTOR_REGISTRY:
         raise HTTPException(
-            status_code=400, detail=f"Unknown extractor for order with model: {model}"
+            status_code=400, detail=f"Unknown extractor for invoice with model: {model}"
         )
 
     tmp_path: Path
@@ -209,10 +212,10 @@ async def generate(
             ),
         )
 
-        pipeline = DocumentPipeline[order_schemas.Order](
+        pipeline = DocumentPipeline[invoice_schemas.Invoice](
             parser=parser_instance,
-            extractor=EXTRACTOR_REGISTRY[(model, "order")](),
-            document_type=DocumentType.ORDER,
+            extractor=EXTRACTOR_REGISTRY[(model, "invoice")](),
+            document_type=DocumentType.INVOICE,
             db=db,
             job_id=job_id,
         )

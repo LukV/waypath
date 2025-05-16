@@ -17,19 +17,16 @@
             "name": "🚀 API: Run FastAPI",
             "type": "debugpy",
             "request": "launch",
-            "module": "poetry",
+            "module": "uvicorn",
             "args": [
-                "run",
-                "uvicorn",
-                "api.app:app",
+                "src.api.app:app",
                 "--reload"
             ],
             "justMyCode": true,
             "console": "integratedTerminal",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
-            },
-            "cwd": "${workspaceFolder}/src/api"
+            }
         }
     ]
 }
