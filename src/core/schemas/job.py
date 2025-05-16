@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from core.utils.config import ObjectType, ProcessingStatus
+from core.utils.config import ProcessingStatus
 
 
 class ProcessingJobCreate(BaseModel):
@@ -21,8 +21,6 @@ class ProcessingJobUpdate(BaseModel):
 
     status: ProcessingStatus
     error_message: str | None = None
-    object_id: str | None = None
-    object_type: ObjectType | None = None
 
 
 class ProcessingJobResponse(BaseModel):
@@ -32,8 +30,6 @@ class ProcessingJobResponse(BaseModel):
     file_name: str | None
     status: ProcessingStatus
     error_message: str | None
-    object_id: str | None
-    object_type: ObjectType | None
     created_by: str
     created_at: datetime
 

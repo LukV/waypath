@@ -4,10 +4,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Annotated
 
-import anyio
 from fastapi import (
     APIRouter,
-    BackgroundTasks,
     Depends,
     File,
     HTTPException,
@@ -23,14 +21,12 @@ from core.db import models
 from core.logic.pipeline import DocumentPipeline
 from core.schemas import job as job_schemas
 from core.schemas import order as order_schemas
+from core.schemas.classifier import DocumentType
 from core.schemas.common import PaginatedResponse
-from core.schemas.job import JobQueuedResponse
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
 from core.utils.auth import get_current_user, is_admin_or_entity_owner
-from core.utils.background import run_document_pipeline_background
 from core.utils.database import get_db
 from core.utils.idsvc import generate_id
-from core.utils.process import sanitize_filename
 
 
 class ParserOption(str, Enum):  # noqa: D101
@@ -171,46 +167,6 @@ async def delete_order(
     await crud_orders.delete_order(db, order_id)
 
 
-@router.post("/upload")
-async def upload_order_from_web(
-    file: Annotated[UploadFile, File(...)],
-    db: Annotated[AsyncSession, Depends(get_db)],
-    current_user: Annotated[models.User, Depends(get_current_user)],
-    background_tasks: BackgroundTasks,
-) -> JobQueuedResponse:
-    """Support authenticated frontend users uploading a document asynchronously."""
-    logger.info("🌐 Upload received from %s", current_user.email)
-
-    filename = sanitize_filename(file.filename or "upload.pdf")
-    tmp_path = Path(f"/tmp/{filename}")  # noqa: S108
-
-    async with await anyio.open_file(tmp_path, "wb") as f:
-        content = await file.read()
-        await f.write(content)
-
-    job_id = generate_id("J")
-
-    await crud_jobs.create_job(
-        db,
-        job_schemas.ProcessingJobCreate(
-            id=job_id,
-            file_name=tmp_path.name,
-            created_by=current_user.id,
-        ),
-    )
-
-    background_tasks.add_task(
-        run_document_pipeline_background,
-        db=db,
-        user=current_user,
-        file_path=str(tmp_path),
-        entity="order",
-        job_id=job_id,
-    )
-
-    return JobQueuedResponse(job_id=job_id)
-
-
 @router.post("/generate", response_model=order_schemas.Order)
 async def generate(
     file: Annotated[UploadFile, File(...)],
@@ -256,10 +212,12 @@ async def generate(
         pipeline = DocumentPipeline[order_schemas.Order](
             parser=parser_instance,
             extractor=EXTRACTOR_REGISTRY[(model, "order")](),
+            document_type=DocumentType.ORDER,
             db=db,
             job_id=job_id,
         )
-        return await pipeline.run()
+        result, _doc_type = await pipeline.run()
+        return result
 
     finally:
         try:

@@ -26,21 +26,6 @@ async def list_all_jobs(
     ]
 
 
-@router.get("/by-user-and-file")
-async def get_job_by_user_and_file(
-    created_by: str,
-    file_name: str,
-    db: Annotated[AsyncSession, Depends(get_db)],
-    _user: Annotated[models.User, Depends(get_current_user)],
-) -> ProcessingJobResponse:
-    """Retrieve a processing job by creator and file name."""
-    job = await crud_jobs.get_job_by_creator_and_file(db, created_by, file_name)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-
-    return ProcessingJobResponse.model_validate(job, from_attributes=True)
-
-
 @router.get("/{job_id}")
 async def get_job_by_id(
     job_id: str,
@@ -49,19 +34,6 @@ async def get_job_by_id(
 ) -> ProcessingJobResponse:
     """Retrieve a processing job by its ID."""
     job = await crud_jobs.get_job_by_id(db, job_id)
-    if not job or (job.created_by != user.id and user.role != "admin"):
-        raise HTTPException(status_code=404, detail="Job not found")
-    return ProcessingJobResponse.model_validate(job, from_attributes=True)
-
-
-@router.get("/by-object/{object_id}")
-async def get_job_by_object_id(
-    object_id: str,
-    db: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[models.User, Depends(get_current_user)],
-) -> ProcessingJobResponse:
-    """Retrieve a processing job by its object ID."""
-    job = await crud_jobs.get_job_by_object_id(db, object_id)
     if not job or (job.created_by != user.id and user.role != "admin"):
         raise HTTPException(status_code=404, detail="Job not found")
     return ProcessingJobResponse.model_validate(job, from_attributes=True)

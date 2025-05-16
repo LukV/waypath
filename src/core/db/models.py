@@ -3,7 +3,7 @@ from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from core.utils.config import ObjectStatus, ObjectType, ProcessingStatus
+from core.utils.config import ObjectStatus, ProcessingStatus
 from core.utils.database import Base
 
 
@@ -133,10 +133,6 @@ class ProcessingJob(Base):
     __tablename__ = "processing_jobs"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    object_id: Mapped[str] = mapped_column(String, nullable=True, index=True)
-    object_type: Mapped[str] = mapped_column(
-        SqlEnum(ObjectType, name="objecttype"), nullable=True
-    )
     status: Mapped[str] = mapped_column(
         SqlEnum(ProcessingStatus, name="processingstatus"),
         nullable=True,

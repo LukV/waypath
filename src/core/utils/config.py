@@ -23,13 +23,6 @@ class ProcessingStatus(str, Enum):  # noqa: D101
     FAILED = "failed"
 
 
-class ObjectType(str, Enum):  # noqa: D101
-    ORDER = "order"
-    INVOICE = "invoice"
-    TENDER = "tender"
-    TIMESHEET = "timesheet"
-
-
 def setup_cors(app: FastAPI) -> None:
     """Set up CORS middleware for the FastAPI application."""
     app.add_middleware(

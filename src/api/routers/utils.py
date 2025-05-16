@@ -2,16 +2,19 @@ import logging
 import os
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, cast
 
 import anyio
 from dotenv import load_dotenv
 from fastapi import (
     APIRouter,
+    BackgroundTasks,
     Depends,
+    File,
     Form,
     HTTPException,
     Request,
+    UploadFile,
     status,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,13 +22,17 @@ from starlette.datastructures import UploadFile as StarletteUploadFile
 
 from api.crud import jobs as crud_jobs
 from api.crud import users as crud_users
+from core.db import models
 from core.schemas import job as job_schemas
-from core.schemas import order as order_schemas
+from core.schemas.invoice import InvoiceResponse
+from core.schemas.order import OrderResponse
+from core.utils.auth import get_current_user
+from core.utils.background import run_document_pipeline_background
 from core.utils.database import get_db
 from core.utils.idsvc import generate_id
 from core.utils.process import (
     is_dangerous_file,
-    process_uploaded_order,
+    process_uploaded_document,
     sanitize_filename,
 )
 
@@ -53,7 +60,7 @@ def is_valid_mailgun_signature(
         return False
 
 
-@router.post("/inbound-email", response_model=list[order_schemas.OrderResponse])
+@router.post("/inbound-email", response_model=list[OrderResponse | InvoiceResponse])
 async def receive(  # noqa: PLR0913
     request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -62,7 +69,7 @@ async def receive(  # noqa: PLR0913
     subject: Annotated[str | None, Form()] = None,
     body_plain: Annotated[str | None, Form()] = None,  # noqa: ARG001
     body_html: Annotated[str | None, Form()] = None,  # noqa: ARG001
-) -> list[order_schemas.OrderResponse]:
+) -> list[OrderResponse | InvoiceResponse]:
     """Process incoming email and parse all valid attachments."""
     logger.info("✅ Received inbound email from %s", sender)
 
@@ -91,7 +98,7 @@ async def receive(  # noqa: PLR0913
     inbox_path = INBOX_ROOT / datetime.now(tz=UTC).strftime("%Y%m%d-%H%M%S")
     inbox_path.mkdir(parents=True, exist_ok=True)
 
-    results = []
+    results: list[OrderResponse | InvoiceResponse] = []
 
     for _, value in form.multi_items():
         if isinstance(value, StarletteUploadFile):
@@ -120,10 +127,13 @@ async def receive(  # noqa: PLR0913
                         created_by=user.id,
                     ),
                 )
-                order = await process_uploaded_order(
+
+                parsed = await process_uploaded_document(
                     db=db, user=user, job_id=job_id, file_path=file_path
                 )
-                results.append(order)
+
+                results.append(cast("OrderResponse | InvoiceResponse", parsed))
+
             finally:
                 file_path.unlink(missing_ok=True)
 
@@ -131,3 +141,42 @@ async def receive(  # noqa: PLR0913
         raise HTTPException(status_code=422, detail="No valid attachments found")
 
     return results
+
+
+@router.post("/upload")
+async def upload_order_from_web(
+    file: Annotated[UploadFile, File(...)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[models.User, Depends(get_current_user)],
+    background_tasks: BackgroundTasks,
+) -> job_schemas.JobQueuedResponse:
+    """Support authenticated frontend users uploading a document asynchronously."""
+    logger.info("🌐 Upload received from %s", current_user.email)
+
+    filename = sanitize_filename(file.filename or "upload.pdf")
+    tmp_path = Path(f"/tmp/{filename}")  # noqa: S108
+
+    async with await anyio.open_file(tmp_path, "wb") as f:
+        content = await file.read()
+        await f.write(content)
+
+    job_id = generate_id("J")
+
+    await crud_jobs.create_job(
+        db,
+        job_schemas.ProcessingJobCreate(
+            id=job_id,
+            file_name=tmp_path.name,
+            created_by=current_user.id,
+        ),
+    )
+
+    background_tasks.add_task(
+        run_document_pipeline_background,
+        db=db,
+        user=current_user,
+        file_path=str(tmp_path),
+        job_id=job_id,
+    )
+
+    return job_schemas.JobQueuedResponse(job_id=job_id)

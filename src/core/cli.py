@@ -1,6 +1,6 @@
 import asyncio
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import typer
 from dotenv import load_dotenv
@@ -8,10 +8,13 @@ from rich import print  # noqa: A004
 from rich.pretty import Pretty
 
 from core.logic.pipeline import DocumentPipeline
-from core.schemas.invoice import Invoice
-from core.schemas.order import Order
+from core.schemas.classifier import DocumentType
 from core.services.factories import EXTRACTOR_REGISTRY, PARSER_REGISTRY
 from core.utils.logging import configure_logging
+
+if TYPE_CHECKING:
+    from core.schemas.invoice import Invoice
+    from core.schemas.order import Order
 
 app = typer.Typer()
 configure_logging()
@@ -58,19 +61,12 @@ async def _parse_internal(  # noqa: PLR0913
     try:
         pipeline: DocumentPipeline[Any]
         result: Order | Invoice
-        if entity == "order":
-            pipeline = DocumentPipeline[Order](
-                parser=parser_instance, extractor=extractor_instance
-            )
-            result = await pipeline.run()
-        elif entity == "invoice":
-            pipeline = DocumentPipeline[Invoice](
-                parser=parser_instance, extractor=extractor_instance
-            )
-            result = await pipeline.run()
-        else:
-            msg = f"Unsupported entity type: {entity}"
-            raise ValueError(msg)  # noqa: TRY301
+        pipeline = DocumentPipeline[Any](
+            parser=parser_instance,
+            extractor=extractor_instance,
+            document_type=DocumentType[entity],
+        )
+        result, _doc_type = await pipeline.run()
     except Exception as e:
         print(f"❌ Pipeline failed: {e}")
         raise
