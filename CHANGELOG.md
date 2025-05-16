@@ -1,7 +1,11 @@
-## v0.27.0 (2025-05-14)
+## v0.28.0 (2025-05-16)
 
 ### Feat
 
+- detect document type as part of pipeline
+- add support for polling processing status
+- Add support for invoices to API
+- support parsing invoices with cli
 - **routers/job.py**: add get_job_by_user_and_file endpoint
 - split status in order status and processing status
 - add filename to order object
