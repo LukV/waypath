@@ -30,6 +30,7 @@ class Invoice(BaseModel):
     total_excl_vat: float = Field(..., description="Total amount excluding VAT")
     vat: float = Field(..., description="VAT amount")
     total_incl_vat: float = Field(..., description="Total amount including VAT")
+    status: ObjectStatus = Field(..., description="Order processing status")
     lines: list[InvoiceLine] = Field(..., description="Line items in the invoice")
 
     model_config = ConfigDict(from_attributes=True)
