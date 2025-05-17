@@ -50,7 +50,10 @@ class Order(Base):
     )
 
     lines: Mapped[list["OrderLine"]] = relationship(
-        "OrderLine", back_populates="order", cascade="all, delete-orphan"
+        "OrderLine",
+        back_populates="order",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
     status: Mapped[ObjectStatus] = mapped_column(
         SqlEnum(ObjectStatus, name="objectstatus"), nullable=False
@@ -101,7 +104,10 @@ class Invoice(Base):
     )
 
     lines: Mapped[list["InvoiceLine"]] = relationship(
-        "InvoiceLine", back_populates="invoice", cascade="all, delete-orphan"
+        "InvoiceLine",
+        back_populates="invoice",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
     status: Mapped[ObjectStatus] = mapped_column(
         SqlEnum(ObjectStatus, name="objectstatus"), nullable=False

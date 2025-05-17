@@ -5,8 +5,8 @@ from typing import Any, TypeVar
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.crud.invoices import create_invoice
-from api.crud.orders import create_order
+from core.crud.invoices import create_invoice
+from core.crud.orders import create_order
 from core.db import models
 from core.schemas.classifier import DocumentType
 from core.schemas.invoice import InvoiceCreate, InvoiceResponse

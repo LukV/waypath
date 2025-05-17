@@ -5,7 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.crud import jobs as crud_jobs
+from core.crud import jobs as crud_jobs
 from core.db import models
 from core.schemas.job import ProcessingJobResponse
 from core.utils.auth import get_current_user

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.crud import users as crud_users
+from core.crud import users as crud_users
 from core.schemas.auth import LoginRequest, TokenPair
 from core.utils import auth
 from core.utils.database import get_db

@@ -70,19 +70,25 @@ async def update_order(
     if not db_order:
         raise HTTPException(status_code=404, detail="Order not found.")
 
-    # Update fields
+    # Update scalar fields
     update_data = order_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
-        setattr(db_order, key, value)
+        if key == "lines":
+            # Remove all existing lines
+            db_order.lines.clear()
+            # Add new OrderLine instances
+            db_order.lines.extend(models.OrderLine(**line) for line in value)
+        else:
+            setattr(db_order, key, value)
 
-    # Commit update
+    # Commit and return
     await db.commit()
 
-    # Refetch order with eager-loaded relationships
+    # Refetch with eager loading
     result = await db.execute(
         select(models.Order)
         .where(models.Order.id == order_id)
-        .options(selectinload(models.Order.lines))  # 👈 this is key
+        .options(selectinload(models.Order.lines))
     )
     return result.scalar_one()
 

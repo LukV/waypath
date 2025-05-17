@@ -15,8 +15,8 @@ from fastapi import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.crud import jobs as crud_jobs
-from api.crud import orders as crud_orders
+from core.crud import jobs as crud_jobs
+from core.crud import orders as crud_orders
 from core.db import models
 from core.logic.pipeline import DocumentPipeline
 from core.schemas import job as job_schemas

@@ -72,19 +72,25 @@ async def update_invoice(
     if not db_invoice:
         raise HTTPException(status_code=404, detail="Invoice not found.")
 
-    # Update fields
+    # Update scalar fields
     update_data = invoice_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
-        setattr(db_invoice, key, value)
+        if key == "lines":
+            # Remove all existing lines
+            db_invoice.lines.clear()
+            # Add new InvoiceLine instances
+            db_invoice.lines.extend(models.InvoiceLine(**line) for line in value)
+        else:
+            setattr(db_invoice, key, value)
 
-    # Commit update
+    # Commit and return
     await db.commit()
 
-    # Refetch invoice with eager-loaded relationships
+    # Refetch with eager loading
     result = await db.execute(
         select(models.Invoice)
         .where(models.Invoice.id == invoice_id)
-        .options(selectinload(models.Invoice.lines))  # 👈 this is key
+        .options(selectinload(models.Invoice.lines))
     )
     return result.scalar_one()
 
