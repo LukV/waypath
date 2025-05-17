@@ -1,4 +1,4 @@
-## v0.28.0 (2025-05-16)
+## v0.29.0 (2025-05-17)
 
 ### Feat
 
@@ -30,6 +30,7 @@
 
 ### Fix
 
+- drop and recreate lines on updating order or invoice lines
 - **Dockerfile**: trust Azure’s X-Forwarded-Proto: https header and preserve the original HTTPS scheme
 - Change @model_validator async to sync for Pydantic v2
 - build fix error
