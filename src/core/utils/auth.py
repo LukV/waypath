@@ -10,7 +10,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.crud import users as crud_users
+from core.crud import users as crud_users
 from core.db import models
 from core.utils.database import Base, get_db
 

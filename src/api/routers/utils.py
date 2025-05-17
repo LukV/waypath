@@ -20,8 +20,8 @@ from fastapi import (
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.datastructures import UploadFile as StarletteUploadFile
 
-from api.crud import jobs as crud_jobs
-from api.crud import users as crud_users
+from core.crud import jobs as crud_jobs
+from core.crud import users as crud_users
 from core.db import models
 from core.schemas import job as job_schemas
 from core.schemas.invoice import InvoiceResponse

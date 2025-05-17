@@ -5,7 +5,7 @@ from jose import jwt
 from jose.exceptions import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.crud import users as crud_users
+from core.crud import users as crud_users
 from core.db import models
 from core.schemas import user as user_schemas
 from core.utils.auth import (

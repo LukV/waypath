@@ -3,7 +3,7 @@ from typing import Generic, TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.crud import jobs as crud_jobs
+from core.crud import jobs as crud_jobs
 from core.schemas.classifier import DocumentType
 from core.schemas.job import ProcessingJobUpdate
 from core.services.extractors.base import AbstractExtractor

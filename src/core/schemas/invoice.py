@@ -48,10 +48,14 @@ class InvoiceCreate(Invoice):
 class InvoiceUpdate(BaseModel):
     """Invoice schema for updating existing invoices."""
 
-    customer_name: str | None = Field(None, description="Name of the customer")
-    customer_address: str | None = Field(None, description="Address of the customer")
+    supplier_name: str | None = Field(None, description="Name of the customer")
+    supplier_address: str | None = Field(None, description="Address of the customer")
+    supplier_vat_number: str | None = Field(
+        None, description="VAT number of the supplier"
+    )
+
     invoice_number: str | None = Field(None, description="Invoice or invoice number")
-    Invoice_date: str | None = Field(
+    invoice_date: str | None = Field(
         None, description="Invoice date as written in the document"
     )
     due_date: str | None = Field(None, description="Due date or payment term")
