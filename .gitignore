@@ -190,3 +190,4 @@ cython_debug/
 *.db
 testdata/
 inbox/
+alembic.ini

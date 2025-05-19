@@ -15,12 +15,10 @@ class Base(DeclarativeBase):  # noqa: D101
 dotenv.load_dotenv()
 
 # Database connection URL
-SQLALCHEMY_DATABASE_URL = os.getenv(
-    "SQLALCHEMY_DATABASE_URL", "sqlite+aiosqlite:///./waypath.db"
-)
+SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL", "sqlite:///./waypath.db")
 
 # Initialize the async engine
-engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True, pool_pre_ping=True)
 
 # Configure AsyncSession
 async_session_maker = sessionmaker(
