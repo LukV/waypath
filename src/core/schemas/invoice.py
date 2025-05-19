@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from core.utils.config import ObjectStatus
+from core.utils.config import Currency, ObjectStatus
 
 
 class InvoiceLine(BaseModel):
@@ -28,6 +28,7 @@ class Invoice(BaseModel):
     )
     due_date: str = Field(..., description="Due date or payment term")
     total_excl_vat: float = Field(..., description="Total amount excluding VAT")
+    currency: Currency = Field(..., description="Currency of the invoice")
     vat: float = Field(..., description="VAT amount")
     total_incl_vat: float = Field(..., description="Total amount including VAT")
     status: ObjectStatus = Field(..., description="Order processing status")
@@ -63,6 +64,7 @@ class InvoiceUpdate(BaseModel):
     total_excl_vat: float | None = Field(
         None, description="Total amount excluding VAT in EUR"
     )
+    currency: Currency | None = Field(None, description="Currency of the invoice")
     vat: float | None = Field(None, description="VAT amount in EUR")
     total_incl_vat: float | None = Field(
         None, description="Total amount including VAT in EUR"

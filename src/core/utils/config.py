@@ -23,6 +23,17 @@ class ProcessingStatus(str, Enum):  # noqa: D101
     FAILED = "failed"
 
 
+class Currency(str, Enum):  # noqa: D101
+    EUR = "EUR"
+    USD = "USD"
+    GBP = "GBP"
+    JPY = "JPY"
+    CNY = "CNY"
+    AUD = "AUD"
+    CAD = "CAD"
+    INR = "INR"
+
+
 def setup_cors(app: FastAPI) -> None:
     """Set up CORS middleware for the FastAPI application."""
     app.add_middleware(

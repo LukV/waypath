@@ -64,7 +64,7 @@ async def _parse_internal(  # noqa: PLR0913
         pipeline = DocumentPipeline[Any](
             parser=parser_instance,
             extractor=extractor_instance,
-            document_type=DocumentType[entity],
+            document_type=DocumentType(entity),
         )
         result, _doc_type = await pipeline.run()
     except Exception as e:
@@ -74,3 +74,7 @@ async def _parse_internal(  # noqa: PLR0913
     if show:
         print("✅ Parsed Structured Data:")
         print(Pretty(result.model_dump()))
+
+
+if __name__ == "__main__":
+    app()
