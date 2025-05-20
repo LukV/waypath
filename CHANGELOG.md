@@ -1,7 +1,8 @@
-## v0.31.0 (2025-05-20)
+## v0.32.0 (2025-05-20)
 
 ### Feat
 
+- add currencies field to invoice and order objects
 - detect document type as part of pipeline
 - add support for polling processing status
 - Add support for invoices to API
@@ -45,6 +46,8 @@
 
 ### Refactor
 
+- migrate db to support currencies
+- migrate sqlite to pg on supabase
 - move /upload to orders in prep of support invoices
 - **factories.py**: create parser and extractor factories to support any doc parser and model
 - refactor order processing logic to service orchestrator pattern
