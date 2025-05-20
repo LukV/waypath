@@ -14,16 +14,20 @@ repos:
     hooks:
       - id: ruff
         args: [--fix]
+        args: ["--exclude=alembic"]
+      - id: ruff-format
+        args: ["--exclude=alembic"]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.15.0
     hooks:
       - id: mypy
         additional_dependencies: []
+        exclude: "^alembic/.*"
         args: [
           "--install-types",
           "--non-interactive",
           "--disable-error-code=no-any-return",
-          "--config-file=pyproject.toml"
+          "--config-file=pyproject.toml",
         ]
         language: system

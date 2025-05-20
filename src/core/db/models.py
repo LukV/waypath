@@ -3,7 +3,7 @@ from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from core.utils.config import ObjectStatus, ProcessingStatus
+from core.utils.config import Currency, ObjectStatus, ProcessingStatus
 from core.utils.database import Base
 
 
@@ -40,6 +40,9 @@ class Order(Base):
     order_date: Mapped[str] = mapped_column(String, nullable=False)
     due_date: Mapped[str] = mapped_column(String, nullable=False)
     total_excl_vat: Mapped[float] = mapped_column(Float, nullable=False)
+    currency: Mapped[Currency] = mapped_column(
+        SqlEnum(Currency, name="currency"), nullable=False, default=Currency.EUR
+    )
     vat: Mapped[float] = mapped_column(Float, nullable=False)
     total_incl_vat: Mapped[float] = mapped_column(Float, nullable=False)
     created_by: Mapped[str] = mapped_column(
@@ -94,6 +97,9 @@ class Invoice(Base):
     invoice_date: Mapped[str] = mapped_column(String, nullable=False)
     due_date: Mapped[str] = mapped_column(String, nullable=False)
     total_excl_vat: Mapped[float] = mapped_column(Float, nullable=False)
+    currency: Mapped[Currency] = mapped_column(
+        SqlEnum(Currency, name="currency"), nullable=False, default=Currency.EUR
+    )
     vat: Mapped[float] = mapped_column(Float, nullable=False)
     total_incl_vat: Mapped[float] = mapped_column(Float, nullable=False)
     created_by: Mapped[str] = mapped_column(

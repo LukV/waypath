@@ -6,9 +6,13 @@
             "type": "debugpy",
             "request": "launch",
             "module": "core.cli",
+            "args": [
+                "inbox/cdfe_0004_00445969.pdf",
+                "--show"
+            ],
             "justMyCode": true,
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/src",
+            "cwd": "${workspaceFolder}",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             }

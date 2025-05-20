@@ -25,6 +25,7 @@ pydantic-ai = "^0.1.8"
 python-multipart = "^0.0.20"
 azure-ai-formrecognizer = "^3.3.3"
 sqlalchemy-pagination = "^0.0.2"
+alembic = "^1.15.2"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.11.7"
@@ -37,10 +38,11 @@ wpath = "core.cli:app"
 
 [tool.mypy]
 plugins = ["sqlalchemy.ext.mypy.plugin", "pydantic.mypy"]
+exclude = ["^alembic/"]
 
 [tool.ruff]
-# your ruff config here
 line-length = 100
+exclude = ["alembic"]
 
 [tool.ruff.format]
 quote-style = "preserve"
