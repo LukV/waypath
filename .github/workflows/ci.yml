@@ -39,7 +39,7 @@ jobs:
         run: poetry install --no-root
 
       - name: "🧹 Ruff (lint + format)"
-        run: poetry run ruff check --output-format=github
+        run: poetry run ruff check src --output-format=github
 
       - name: "🔍 MyPy (type checks)"
-        run: poetry run mypy .
+        run: poetry run mypy src
