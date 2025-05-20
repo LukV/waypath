@@ -1,13 +1,21 @@
 import asyncio
+import sys
 from logging.config import fileConfig
+from pathlib import Path
 
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from src.core.utils.database import Base
 
+sys.path.append(str((Path(__file__).parent / "..").resolve()))
+
+# Import Base and ensure all models are loaded
+import core.db  # noqa: F401 → this triggers `core/db/__init__.py`, which imports models
+from core.utils.database import Base
+
+# Now metadata includes all model tables
 target_metadata = Base.metadata
 
 # this is the Alembic Config object, which provides
@@ -21,13 +29,13 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from myapp import mymodel # noqa: ERA001
-# target_metadata = mymodel.Base.metadata  # noqa: ERA001
-# target_metadata = None # noqa: ERA001
+# from myapp import mymodel
+# target_metadata = mymodel.Base.metadata
+# target_metadata = None
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
-# my_important_option = config.get_main_option("my_important_option") # noqa: ERA001
+# my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
 
@@ -56,7 +64,6 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    """Run migrations in 'online' mode."""
     context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():

@@ -41,7 +41,7 @@ class Order(Base):
     due_date: Mapped[str] = mapped_column(String, nullable=False)
     total_excl_vat: Mapped[float] = mapped_column(Float, nullable=False)
     currency: Mapped[Currency] = mapped_column(
-        SqlEnum(Currency, name="currency"), nullable=False
+        SqlEnum(Currency, name="currency"), nullable=False, default=Currency.EUR
     )
     vat: Mapped[float] = mapped_column(Float, nullable=False)
     total_incl_vat: Mapped[float] = mapped_column(Float, nullable=False)
@@ -98,7 +98,7 @@ class Invoice(Base):
     due_date: Mapped[str] = mapped_column(String, nullable=False)
     total_excl_vat: Mapped[float] = mapped_column(Float, nullable=False)
     currency: Mapped[Currency] = mapped_column(
-        SqlEnum(Currency, name="currency"), nullable=False
+        SqlEnum(Currency, name="currency"), nullable=False, default=Currency.EUR
     )
     vat: Mapped[float] = mapped_column(Float, nullable=False)
     total_incl_vat: Mapped[float] = mapped_column(Float, nullable=False)
