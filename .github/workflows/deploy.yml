@@ -46,8 +46,8 @@ jobs:
 
       - name: ✅ Lint & Typecheck
         run: |
-          poetry run ruff check .
-          poetry run mypy .
+          poetry run ruff check src
+          poetry run mypy src
 
       - name: 🧾 Configure Git
         run: |
