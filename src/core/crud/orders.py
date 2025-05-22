@@ -7,18 +7,20 @@ from sqlalchemy.orm import selectinload
 
 from core.db import models
 from core.schemas import order as order_schemas
-from core.utils.config import ObjectStatus
 from core.utils.idsvc import generate_id
+from core.validators.total_amount import validate
 
 
 async def create_order(
     db: AsyncSession, order: order_schemas.OrderCreate, current_user: models.User
 ) -> models.Order:
     """Create a new order in the database."""
+    validated_status = validate(order)
+
     db_order = models.Order(
         id=order.id or generate_id("O"),
         file_name=order.file_name,
-        status=order.status or ObjectStatus.TO_ACCEPT,
+        status=validated_status,
         customer_name=order.customer_name,
         customer_address=order.customer_address,
         invoice_number=order.invoice_number,

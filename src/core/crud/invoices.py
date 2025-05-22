@@ -7,18 +7,20 @@ from sqlalchemy.orm import selectinload
 
 from core.db import models
 from core.schemas import invoice as invoice_schemas
-from core.utils.config import ObjectStatus
 from core.utils.idsvc import generate_id
+from core.validators.total_amount import validate
 
 
 async def create_invoice(
     db: AsyncSession, invoice: invoice_schemas.InvoiceCreate, current_user: models.User
 ) -> models.Invoice:
     """Create a new invoice in the database."""
+    validated_status = validate(invoice)
+
     db_invoice = models.Invoice(
         id=invoice.id or generate_id("I"),
         file_name=invoice.file_name,
-        status=invoice.status or ObjectStatus.TO_ACCEPT,
+        status=validated_status,
         supplier_name=invoice.supplier_name,
         supplier_address=invoice.supplier_address,
         supplier_vat_number=invoice.supplier_vat_number,
